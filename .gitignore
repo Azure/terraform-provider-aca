@@ -27,7 +27,12 @@ Thumbs.db
 
 # Build artifacts
 *.pptx
-*.html
+
+# Jekyll
+_site/
+.jekyll-cache/
+.jekyll-metadata
+Gemfile.lock
 
 # Python
 __pycache__/

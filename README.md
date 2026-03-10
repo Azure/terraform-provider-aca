@@ -30,7 +30,7 @@ only when needed, with explicit opt-in via feature flags.
 
 ```hcl
 module "aca" {
-  source = "github.com/your-org/terraform-provider-aca"
+  source = "github.com/Azure/terraform-provider-aca"
 
   name                = "my-app"
   resource_group_name = azurerm_resource_group.rg.name
@@ -60,7 +60,7 @@ module "aca" {
 
 ```hcl
 module "aca" {
-  source = "github.com/your-org/terraform-provider-aca"
+  source = "github.com/Azure/terraform-provider-aca"
 
   name                = "my-app"
   resource_group_name = azurerm_resource_group.rg.name
@@ -102,7 +102,7 @@ module "aca" {
 
 ```hcl
 module "aca" {
-  source = "github.com/your-org/terraform-provider-aca"
+  source = "github.com/Azure/terraform-provider-aca"
 
   name                = "my-app"
   resource_group_name = azurerm_resource_group.rg.name

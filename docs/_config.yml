@@ -1,0 +1,21 @@
+title: "Terraform ACA Extension Layer"
+description: "AzureRM facade module with transparent AzAPI overlay for Azure Container Apps"
+baseurl: "/terraform-provider-aca"
+url: ""
+markdown: kramdown
+highlighter: rouge
+
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
+
+exclude:
+  - api-versions.json
+  - migration-guide.md
+  - api-versions.schema.json
