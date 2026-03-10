@@ -1,0 +1,6 @@
+name     = "aca-simple"
+location = "eastus2"
+tags = {
+  environment = "dev"
+  managed_by  = "terraform"
+}

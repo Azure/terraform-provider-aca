@@ -1,0 +1,8 @@
+resource_group_name = "rg-jobs-aca"
+name                = "jobs-aca"
+cleanup_job_image   = "myregistry.azurecr.io/cleanup:v1.0"
+queue_processor_image = "myregistry.azurecr.io/queue-processor:v1.0"
+queue_name          = "work-items"
+storage_account_name = "mystorageaccount"
+# db_connection_string    = "..." # Set via TF_VAR_db_connection_string
+# queue_connection_string = "..." # Set via TF_VAR_queue_connection_string

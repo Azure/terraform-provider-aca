@@ -1,0 +1,6 @@
+resource_group_name  = "rg-microservices-aca"
+name                 = "microservices-aca"
+frontend_image       = "myregistry.azurecr.io/frontend:v1.0"
+backend_api_image    = "myregistry.azurecr.io/backend-api:v1.0"
+worker_image         = "myregistry.azurecr.io/worker:v1.0"
+# db_connection_string = "..." # Set via TF_VAR_db_connection_string or -var flag
