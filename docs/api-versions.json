@@ -1,0 +1,176 @@
+{
+  "$schema": "./api-versions.schema.json",
+  "description": "Registry of ACA API versions and feature coverage status. Update this file when a new API version is published by the ACA team to trigger the coverage workflow.",
+  "latest_api_version": "2025-07-01",
+  "latest_preview_version": "2025-10-02-preview",
+  "api_specs_path": "specification/app/resource-manager/Microsoft.App/ContainerApps",
+  "resource_types": {
+    "Microsoft.App/containerApps": "2025-07-01",
+    "Microsoft.App/managedEnvironments": "2025-07-01",
+    "Microsoft.App/managedEnvironments/javaComponents": "2025-07-01",
+    "Microsoft.App/sessionPools": "2025-07-01",
+    "Microsoft.App/jobs": "2025-07-01"
+  },
+  "features": [
+    {
+      "name": "sticky_sessions",
+      "api_version_introduced": "2023-05-01",
+      "azurerm_supported": false,
+      "module_supported": true,
+      "example": "sticky_sessions",
+      "resource_path": "properties.configuration.ingress.stickySessions"
+    },
+    {
+      "name": "additional_port_mappings",
+      "api_version_introduced": "2024-03-01",
+      "azurerm_supported": false,
+      "module_supported": true,
+      "example": "additional_ports",
+      "resource_path": "properties.configuration.ingress.additionalPortMappings"
+    },
+    {
+      "name": "private_endpoints",
+      "api_version_introduced": "2025-07-01",
+      "azurerm_supported": false,
+      "module_supported": true,
+      "example": "private_endpoint",
+      "resource_path": "N/A (uses azurerm_private_endpoint with managedEnvironments subresource)"
+    },
+    {
+      "name": "java_components",
+      "api_version_introduced": "2025-01-01",
+      "azurerm_supported": false,
+      "module_supported": true,
+      "example": "java_spring",
+      "resource_path": "Microsoft.App/managedEnvironments/javaComponents"
+    },
+    {
+      "name": "session_pools",
+      "api_version_introduced": "2025-01-01",
+      "azurerm_supported": false,
+      "module_supported": true,
+      "example": "sessions",
+      "resource_path": "Microsoft.App/sessionPools"
+    },
+    {
+      "name": "cors_policy",
+      "api_version_introduced": "2022-10-01",
+      "azurerm_supported": true,
+      "module_supported": true,
+      "example": "cors_api",
+      "resource_path": "properties.configuration.ingress.corsPolicy"
+    },
+    {
+      "name": "init_containers",
+      "api_version_introduced": "2022-10-01",
+      "azurerm_supported": true,
+      "module_supported": true,
+      "example": "init_containers",
+      "resource_path": "properties.template.initContainers"
+    },
+    {
+      "name": "autoscaling_rules",
+      "api_version_introduced": "2022-03-01",
+      "azurerm_supported": true,
+      "module_supported": true,
+      "example": "autoscaling",
+      "resource_path": "properties.template.scale"
+    },
+    {
+      "name": "custom_domains",
+      "api_version_introduced": "2022-03-01",
+      "azurerm_supported": true,
+      "module_supported": true,
+      "example": "custom_domains",
+      "resource_path": "properties.configuration.ingress.customDomains"
+    },
+    {
+      "name": "volume_mounts",
+      "api_version_introduced": "2022-03-01",
+      "azurerm_supported": true,
+      "module_supported": true,
+      "example": "storage",
+      "resource_path": "properties.template.volumes"
+    },
+    {
+      "name": "dapr",
+      "api_version_introduced": "2022-03-01",
+      "azurerm_supported": true,
+      "module_supported": true,
+      "example": "microservices",
+      "resource_path": "properties.configuration.dapr"
+    },
+    {
+      "name": "workload_profiles",
+      "api_version_introduced": "2023-05-01",
+      "azurerm_supported": true,
+      "module_supported": true,
+      "example": "enterprise_app",
+      "resource_path": "Microsoft.App/managedEnvironments.properties.workloadProfiles"
+    },
+    {
+      "name": "mtls",
+      "api_version_introduced": "2023-05-01",
+      "azurerm_supported": true,
+      "module_supported": true,
+      "example": "enterprise_app",
+      "resource_path": "Microsoft.App/managedEnvironments.properties.peerAuthentication"
+    },
+    {
+      "name": "jobs",
+      "api_version_introduced": "2023-05-01",
+      "azurerm_supported": true,
+      "module_supported": true,
+      "example": "jobs",
+      "resource_path": "Microsoft.App/jobs"
+    },
+    {
+      "name": "multiple_revisions",
+      "api_version_introduced": "2022-03-01",
+      "azurerm_supported": true,
+      "module_supported": true,
+      "example": "blue_green",
+      "resource_path": "properties.configuration.activeRevisionsMode"
+    },
+    {
+      "name": "resiliency_policies",
+      "api_version_introduced": null,
+      "azurerm_supported": false,
+      "module_supported": false,
+      "example": null,
+      "resource_path": "Microsoft.App/containerApps/resiliencyPolicies"
+    },
+    {
+      "name": "dotnet_components",
+      "api_version_introduced": null,
+      "azurerm_supported": false,
+      "module_supported": false,
+      "example": null,
+      "resource_path": "Microsoft.App/managedEnvironments/dotNetComponents"
+    },
+    {
+      "name": "logic_apps_integration",
+      "api_version_introduced": "2025-07-01",
+      "azurerm_supported": false,
+      "module_supported": false,
+      "example": null,
+      "resource_path": "Microsoft.App/containerApps (kind=workflowapp)"
+    },
+    {
+      "name": "ip_restrictions",
+      "api_version_introduced": "2022-10-01",
+      "azurerm_supported": true,
+      "module_supported": false,
+      "example": null,
+      "resource_path": "properties.configuration.ingress.ipSecurityRestrictions"
+    },
+    {
+      "name": "premium_ingress",
+      "api_version_introduced": "2025-07-01",
+      "azurerm_supported": false,
+      "module_supported": true,
+      "example": "premium_ingress",
+      "resource_path": "Microsoft.App/managedEnvironments.properties.ingressConfiguration"
+    }
+  ]
+}

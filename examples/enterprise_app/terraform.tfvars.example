@@ -1,0 +1,6 @@
+resource_group_name = "rg-enterprise-aca"
+acr_name            = "myenterprisecr"
+name                = "enterprise-aca"
+environment         = "Production"
+cost_center         = "engineering-platform"
+image_tag           = "v1.2.0"

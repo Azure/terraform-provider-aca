@@ -1,0 +1,58 @@
+<nav class="sidebar-nav">
+  <div class="sidebar-section">
+    <h3 class="sidebar-heading">Getting Started</h3>
+    <ul>
+      <li><a href="{{ '/' | relative_url }}" {% if page.url == '/' or page.url == '/index.html' %}class="active"{% endif %}>Overview</a></li>
+      <li><a href="{{ '/getting-started' | relative_url }}" {% if page.url contains 'getting-started' %}class="active"{% endif %}>Quick Start</a></li>
+      <li><a href="{{ '/architecture' | relative_url }}" {% if page.url contains 'architecture' %}class="active"{% endif %}>Architecture</a></li>
+    </ul>
+  </div>
+
+  <div class="sidebar-section">
+    <h3 class="sidebar-heading">Reference</h3>
+    <ul>
+      <li><a href="{{ '/modules' | relative_url }}" {% if page.url contains 'modules' %}class="active"{% endif %}>Modules</a></li>
+      <li><a href="{{ '/variables' | relative_url }}" {% if page.url contains 'variables' %}class="active"{% endif %}>Variables</a></li>
+      <li><a href="{{ '/feature-flags' | relative_url }}" {% if page.url contains 'feature-flags' %}class="active"{% endif %}>Feature Flags</a></li>
+      <li><a href="{{ '/api-coverage' | relative_url }}" {% if page.url contains 'api-coverage' %}class="active"{% endif %}>API Coverage</a></li>
+    </ul>
+  </div>
+
+  <div class="sidebar-section">
+    <h3 class="sidebar-heading">Guides</h3>
+    <ul>
+      <li><a href="{{ '/migration' | relative_url }}" {% if page.url contains 'migration' %}class="active"{% endif %}>Migration Guide</a></li>
+    </ul>
+  </div>
+
+  <div class="sidebar-section">
+    <h3 class="sidebar-heading">Examples</h3>
+    <ul>
+      <li><a href="{{ '/examples/' | relative_url }}" {% if page.url == '/examples/' or page.url == '/examples/index.html' %}class="active"{% endif %}>Overview</a></li>
+    </ul>
+    <h4 class="sidebar-subheading">⭐ Beginner</h4>
+    <ul>
+      <li><a href="{{ '/examples/simple-app' | relative_url }}" {% if page.url contains 'simple-app' %}class="active"{% endif %}>Simple App</a></li>
+    </ul>
+    <h4 class="sidebar-subheading">⭐⭐ Intermediate</h4>
+    <ul>
+      <li><a href="{{ '/examples/enterprise-app' | relative_url }}" {% if page.url contains 'enterprise-app' %}class="active"{% endif %}>Enterprise App</a></li>
+      <li><a href="{{ '/examples/jobs' | relative_url }}" {% if page.url contains '/jobs' %}class="active"{% endif %}>Jobs</a></li>
+      <li><a href="{{ '/examples/sticky-sessions' | relative_url }}" {% if page.url contains 'sticky-sessions' %}class="active"{% endif %}>Sticky Sessions</a></li>
+      <li><a href="{{ '/examples/custom-domains' | relative_url }}" {% if page.url contains 'custom-domains' %}class="active"{% endif %}>Custom Domains</a></li>
+      <li><a href="{{ '/examples/autoscaling' | relative_url }}" {% if page.url contains 'autoscaling' %}class="active"{% endif %}>Autoscaling</a></li>
+      <li><a href="{{ '/examples/blue-green' | relative_url }}" {% if page.url contains 'blue-green' %}class="active"{% endif %}>Blue/Green Deploy</a></li>
+      <li><a href="{{ '/examples/cors-api' | relative_url }}" {% if page.url contains 'cors-api' %}class="active"{% endif %}>CORS API</a></li>
+      <li><a href="{{ '/examples/init-containers' | relative_url }}" {% if page.url contains 'init-containers' %}class="active"{% endif %}>Init Containers</a></li>
+    </ul>
+    <h4 class="sidebar-subheading">⭐⭐⭐ Advanced</h4>
+    <ul>
+      <li><a href="{{ '/examples/microservices' | relative_url }}" {% if page.url contains 'microservices' %}class="active"{% endif %}>Microservices</a></li>
+      <li><a href="{{ '/examples/sessions' | relative_url }}" {% if page.url contains '/sessions' and page.url != '/examples/sticky-sessions' %}class="active"{% endif %}>Dynamic Sessions</a></li>
+      <li><a href="{{ '/examples/storage' | relative_url }}" {% if page.url contains 'storage' %}class="active"{% endif %}>Storage Volumes</a></li>
+      <li><a href="{{ '/examples/private-endpoint' | relative_url }}" {% if page.url contains 'private-endpoint' %}class="active"{% endif %}>Private Endpoint</a></li>
+      <li><a href="{{ '/examples/additional-ports' | relative_url }}" {% if page.url contains 'additional-ports' %}class="active"{% endif %}>Additional Ports</a></li>
+      <li><a href="{{ '/examples/java-spring' | relative_url }}" {% if page.url contains 'java-spring' %}class="active"{% endif %}>Java Spring</a></li>
+    </ul>
+  </div>
+</nav>

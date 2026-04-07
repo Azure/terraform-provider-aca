@@ -1,0 +1,130 @@
+# ACA API Coverage Workflow
+#
+# Runs every Sunday at 12:00 UTC to check for new ACA API versions.
+# If a new version is found, launches Copilot coding agent to analyze it,
+# add module coverage, create examples, and open a PR.
+#
+# Can also be triggered manually via workflow_dispatch, or on push to
+# docs/api-versions.json for ad-hoc updates.
+
+name: ACA API Coverage
+
+on:
+  schedule:
+    - cron: '0 12 * * 0'  # Every Sunday at 12:00 UTC
+  push:
+    branches: [main]
+    paths:
+      - 'docs/api-versions.json'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force run even if no new API version detected'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check-for-updates:
+    runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.check.outputs.new_version }}
+      current_version: ${{ steps.check.outputs.current_version }}
+      should_run: ${{ steps.check.outputs.should_run }}
+      has_new_preview: ${{ steps.check_preview.outputs.has_new_preview }}
+      latest_preview: ${{ steps.check_preview.outputs.latest_preview }}
+      current_preview: ${{ steps.check_preview.outputs.current_preview }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for new ACA API versions
+        id: check
+        env:
+          FORCE: ${{ inputs.force || 'false' }}
+        run: |
+          CURRENT=$(jq -r '.latest_api_version' docs/api-versions.json)
+          echo "current_version=$CURRENT" >> "$GITHUB_OUTPUT"
+
+          # Query Azure REST API specs repo for latest GA version
+          # Path: specification/app/resource-manager/Microsoft.App/ContainerApps/stable/
+          LATEST=$(curl -sf "https://api.github.com/repos/Azure/azure-rest-api-specs/contents/specification/app/resource-manager/Microsoft.App/ContainerApps/stable" \
+            -H "Accept: application/vnd.github.v3+json" \
+            | jq -r '.[].name' | sort -V | tail -1)
+
+          echo "latest_available=$LATEST" >> "$GITHUB_OUTPUT"
+
+          if [ "$FORCE" = "true" ]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            echo "new_version=$CURRENT" >> "$GITHUB_OUTPUT"
+            echo "::notice::Force run requested, using current version $CURRENT"
+          elif [ -z "$LATEST" ]; then
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Could not fetch latest API version from Azure specs repo"
+          elif [ "$LATEST" != "$CURRENT" ]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            echo "new_version=$LATEST" >> "$GITHUB_OUTPUT"
+            echo "::notice::New GA API version found: $LATEST (current: $CURRENT)"
+          else
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Already up to date at GA $CURRENT"
+          fi
+
+      - name: Check for new preview versions
+        id: check_preview
+        run: |
+          CURRENT_PREVIEW=$(jq -r '.latest_preview_version' docs/api-versions.json)
+
+          # Path: specification/app/resource-manager/Microsoft.App/ContainerApps/preview/
+          LATEST_PREVIEW=$(curl -sf "https://api.github.com/repos/Azure/azure-rest-api-specs/contents/specification/app/resource-manager/Microsoft.App/ContainerApps/preview" \
+            -H "Accept: application/vnd.github.v3+json" \
+            | jq -r '.[].name' | sort -V | tail -1)
+
+          echo "current_preview=$CURRENT_PREVIEW" >> "$GITHUB_OUTPUT"
+          echo "latest_preview=$LATEST_PREVIEW" >> "$GITHUB_OUTPUT"
+
+          NEW_PREVIEW="false"
+          if [ -n "$LATEST_PREVIEW" ] && [ "$LATEST_PREVIEW" != "$CURRENT_PREVIEW" ]; then
+            NEW_PREVIEW="true"
+            echo "::notice::New preview version found: $LATEST_PREVIEW (current: $CURRENT_PREVIEW)"
+          fi
+          echo "has_new_preview=$NEW_PREVIEW" >> "$GITHUB_OUTPUT"
+
+  update-coverage:
+    needs: check-for-updates
+    if: needs.check-for-updates.outputs.should_run == 'true' || needs.check-for-updates.outputs.has_new_preview == 'true' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.9.x'
+
+      - name: Run Copilot coding agent
+        uses: github/copilot-coding-agent@v1
+        with:
+          prompt: |
+            Weekly ACA API coverage check has detected changes.
+
+            GA version:      ${{ needs.check-for-updates.outputs.new_version || needs.check-for-updates.outputs.current_version }}  (was: ${{ needs.check-for-updates.outputs.current_version }})
+            Preview version: ${{ needs.check-for-updates.outputs.latest_preview || 'unknown' }}  (was: ${{ needs.check-for-updates.outputs.current_preview || 'unknown' }})
+
+            The Azure REST API specs are at:
+            - GA:      https://github.com/Azure/azure-rest-api-specs/tree/main/specification/app/resource-manager/Microsoft.App/ContainerApps/stable
+            - Preview: https://github.com/Azure/azure-rest-api-specs/tree/main/specification/app/resource-manager/Microsoft.App/ContainerApps/preview
+
+            Follow the instructions in .github/prompts/new-api-coverage.prompt.md to:
+            1. Analyze what's new by diffing the swagger specs between the previous and new versions
+            2. Update docs/api-versions.json with new features and versions
+            3. Add AzAPI overlay support in the module for any AzAPI-only features
+            4. Create examples for significant new features
+            5. Validate all examples with terraform validate
+            6. Open a PR with the changes
+
+            Current registry is in docs/api-versions.json. Read it first.
+            Repo conventions are in .github/copilot-instructions.md. Read that too.

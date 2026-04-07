@@ -1,0 +1,262 @@
+# Capability Registry — Terraform ACA Extension Layer
+#
+# This registry maps ACA features to their implementing Terraform provider.
+# It is the source of truth for provider routing decisions.
+#
+# Fields:
+#   feature            - Unique feature identifier (matches feature_flags key)
+#   description        - Human-readable description
+#   resource_type      - ARM resource type
+#   provider           - Current implementation provider (azurerm | azapi)
+#   api_version        - Azure API version (relevant when provider = azapi)
+#   native_in_azurerm  - Whether AzureRM natively supports this feature
+#   preview            - Whether this is a preview feature
+#   feature_flag       - The feature_flags key that gates this (null if GA/azurerm)
+#   module             - Which submodule owns this feature
+#
+# When AzureRM adds native support for an azapi feature:
+#   1. Set native_in_azurerm: true
+#   2. Change provider: azurerm
+#   3. Remove api_version (or leave for reference)
+#   4. Update the corresponding module code
+#   5. Document state migration steps
+
+# =============================================================================
+# Container App Environment
+# =============================================================================
+
+- feature: environment_base
+  description: Core Container App Environment resource
+  resource_type: Microsoft.App/managedEnvironments
+  provider: azurerm
+  api_version: null
+  native_in_azurerm: true
+  preview: false
+  feature_flag: null
+  module: container_app_environment
+
+- feature: environment_workload_profiles
+  description: Workload profiles for dedicated compute in environments
+  resource_type: Microsoft.App/managedEnvironments
+  provider: azurerm
+  api_version: null
+  native_in_azurerm: true
+  preview: false
+  feature_flag: null
+  module: container_app_environment
+
+- feature: environment_custom_domain
+  description: Custom domain verification and configuration
+  resource_type: Microsoft.App/managedEnvironments
+  provider: azurerm
+  api_version: null
+  native_in_azurerm: true
+  preview: false
+  feature_flag: null
+  module: container_app_environment
+
+- feature: environment_mutual_tls
+  description: Mutual TLS (mTLS) for environment-level encryption
+  resource_type: Microsoft.App/managedEnvironments
+  provider: azurerm
+  api_version: null
+  native_in_azurerm: true
+  preview: false
+  feature_flag: null
+  module: container_app_environment
+
+- feature: environment_peer_authentication
+  description: Peer-to-peer authentication enforcement
+  resource_type: Microsoft.App/managedEnvironments
+  provider: azapi
+  api_version: "2024-10-02-preview"
+  native_in_azurerm: false
+  preview: true
+  feature_flag: peer_authentication
+  module: container_app_environment
+
+- feature: environment_premium_ingress
+  description: Premium Ingress — dedicated workload profile for ingress proxies
+  resource_type: Microsoft.App/managedEnvironments
+  provider: azapi
+  api_version: "2025-07-01"
+  native_in_azurerm: false
+  preview: false
+  feature_flag: premium_ingress
+  module: container_app_environment
+
+# =============================================================================
+# Container App
+# =============================================================================
+
+- feature: container_app_base
+  description: Core Container App resource with template, ingress, secrets
+  resource_type: Microsoft.App/containerApps
+  provider: azurerm
+  api_version: null
+  native_in_azurerm: true
+  preview: false
+  feature_flag: null
+  module: container_app
+
+- feature: container_app_dapr
+  description: Dapr sidecar integration
+  resource_type: Microsoft.App/containerApps
+  provider: azurerm
+  api_version: null
+  native_in_azurerm: true
+  preview: false
+  feature_flag: null
+  module: container_app
+
+- feature: container_app_identity
+  description: Managed identity (system and user-assigned)
+  resource_type: Microsoft.App/containerApps
+  provider: azurerm
+  api_version: null
+  native_in_azurerm: true
+  preview: false
+  feature_flag: null
+  module: container_app
+
+- feature: container_app_ingress
+  description: Basic ingress configuration (port, external, transport)
+  resource_type: Microsoft.App/containerApps
+  provider: azurerm
+  api_version: null
+  native_in_azurerm: true
+  preview: false
+  feature_flag: null
+  module: container_app
+
+- feature: container_app_scale
+  description: Scale rules (HTTP, custom, min/max replicas)
+  resource_type: Microsoft.App/containerApps
+  provider: azurerm
+  api_version: null
+  native_in_azurerm: true
+  preview: false
+  feature_flag: null
+  module: container_app
+
+- feature: container_app_registry
+  description: Container registry authentication
+  resource_type: Microsoft.App/containerApps
+  provider: azurerm
+  api_version: null
+  native_in_azurerm: true
+  preview: false
+  feature_flag: null
+  module: container_app
+
+- feature: container_app_advanced_ingress
+  description: Additional port mappings and advanced ingress configuration
+  resource_type: Microsoft.App/containerApps
+  provider: azapi
+  api_version: "2024-10-02-preview"
+  native_in_azurerm: false
+  preview: true
+  feature_flag: advanced_ingress
+  module: container_app
+
+- feature: container_app_kind_functionapp
+  description: Function App kind for Container Apps (Azure Functions on ACA)
+  resource_type: Microsoft.App/containerApps
+  provider: azapi
+  api_version: "2025-01-01"
+  native_in_azurerm: false
+  preview: true
+  feature_flag: kind_functionapp
+  module: container_app
+
+- feature: container_app_dapr_app_health
+  description: Dapr application health probe configuration
+  resource_type: Microsoft.App/containerApps
+  provider: azapi
+  api_version: "2024-10-02-preview"
+  native_in_azurerm: false
+  preview: true
+  feature_flag: dapr_app_health
+  module: container_app
+
+# =============================================================================
+# Container App Jobs
+# =============================================================================
+
+- feature: jobs_base
+  description: Core Container App Job resource with schedule/event triggers
+  resource_type: Microsoft.App/jobs
+  provider: azurerm
+  api_version: null
+  native_in_azurerm: true
+  preview: false
+  feature_flag: null
+  module: jobs
+
+- feature: jobs_identity
+  description: Managed identity for jobs
+  resource_type: Microsoft.App/jobs
+  provider: azurerm
+  api_version: null
+  native_in_azurerm: true
+  preview: false
+  feature_flag: null
+  module: jobs
+
+- feature: jobs_event_trigger_advanced
+  description: Advanced event-driven trigger configuration
+  resource_type: Microsoft.App/jobs
+  provider: azapi
+  api_version: "2024-10-02-preview"
+  native_in_azurerm: false
+  preview: true
+  feature_flag: jobs_event_trigger_advanced
+  module: jobs
+
+# =============================================================================
+# Networking
+# =============================================================================
+
+- feature: networking_vnet_integration
+  description: VNet integration with dedicated subnet for ACA environment
+  resource_type: Microsoft.Network/virtualNetworks
+  provider: azurerm
+  api_version: null
+  native_in_azurerm: true
+  preview: false
+  feature_flag: null
+  module: networking
+
+- feature: networking_nsg
+  description: Network Security Group for ACA subnet
+  resource_type: Microsoft.Network/networkSecurityGroups
+  provider: azurerm
+  api_version: null
+  native_in_azurerm: true
+  preview: false
+  feature_flag: null
+  module: networking
+
+# =============================================================================
+# Observability
+# =============================================================================
+
+- feature: observability_log_analytics
+  description: Log Analytics workspace for ACA environment
+  resource_type: Microsoft.OperationalInsights/workspaces
+  provider: azurerm
+  api_version: null
+  native_in_azurerm: true
+  preview: false
+  feature_flag: null
+  module: observability
+
+- feature: observability_diagnostics
+  description: Diagnostic settings for ACA resources
+  resource_type: Microsoft.Insights/diagnosticSettings
+  provider: azurerm
+  api_version: null
+  native_in_azurerm: true
+  preview: false
+  feature_flag: null
+  module: observability
