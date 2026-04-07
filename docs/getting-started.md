@@ -131,7 +131,7 @@ terraform destroy
 - Add [networking and VNet integration]({{ '/examples/simple-app' | relative_url }}) for production workloads
 - Enable [observability]({{ '/examples/enterprise-app' | relative_url }}) with App Insights
 - Explore [preview features]({{ '/feature-flags' | relative_url }}) like session affinity and CORS policies
-- Browse all [15 examples]({{ '/examples/' | relative_url }})
+- Browse all [16 examples]({{ '/examples/' | relative_url }})
 
 ## Using an Existing Example
 

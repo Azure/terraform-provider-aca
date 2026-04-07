@@ -27,6 +27,7 @@ Variable names match AzureRM 1:1, so migrating from raw `azurerm` to the module 
 | CORS API (AzAPI) | ~220 lines | ~70 lines | **68%** |
 | Java Spring (AzAPI) | ~300 lines | ~90 lines | **70%** |
 | Init Containers | ~160 lines | ~50 lines | **69%** |
+| Premium Ingress (AzAPI) | ~200 lines | ~60 lines | **70%** |
 
 ## Examples Matrix
 
@@ -47,6 +48,7 @@ Variable names match AzureRM 1:1, so migrating from raw `azurerm` to the module 
 | [cors_api](cors_api/) | ⭐⭐ Intermediate | Frontend + API apps with CORS policy via AzAPI overlay | RG, LAW, Environment, 2 Apps + AzAPI CORS |
 | [java_spring](java_spring/) | ⭐⭐⭐ Advanced | Eureka + Config Server via AzAPI Java components + service bindings | RG, LAW, Environment, 2 Java Components (AzAPI), 1 App |
 | [init_containers](init_containers/) | ⭐⭐ Intermediate | Init containers with shared EmptyDir volumes | RG, LAW, Environment, 1 App (init + main container) |
+| [premium_ingress](premium_ingress/) | ⭐⭐ Intermediate | Premium Ingress with dedicated workload profile via AzAPI | RG, LAW, Environment (D4 ingress profile + AzAPI overlay), 1 App |
 
 ## Module Architecture
 
@@ -136,3 +138,4 @@ terraform destroy
 - [CORS API](cors_api/) — Frontend + API with CORS policy
 - [Java Spring](java_spring/) — Eureka + Config Server via AzAPI
 - [Init Containers](init_containers/) — Init containers with shared volumes
+- [Premium Ingress](premium_ingress/) — Dedicated ingress workload profile via AzAPI

@@ -60,6 +60,7 @@ module "environment" {
   zone_redundancy_enabled                     = try(var.environment.zone_redundancy_enabled, false)
   mutual_tls_enabled                          = try(var.environment.mutual_tls_enabled, false)
   workload_profile                            = try(var.environment.workload_profile, [])
+  ingress_configuration                       = try(var.environment.ingress_configuration, null)
   feature_flags                               = try(var.environment.feature_flags, {})
   provider_overrides                          = try(var.environment.provider_overrides, {})
   tags                                        = var.tags
