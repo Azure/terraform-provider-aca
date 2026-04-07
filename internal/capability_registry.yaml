@@ -75,6 +75,16 @@
   feature_flag: peer_authentication
   module: container_app_environment
 
+- feature: environment_premium_ingress
+  description: Premium Ingress — dedicated workload profile for ingress proxies
+  resource_type: Microsoft.App/managedEnvironments
+  provider: azapi
+  api_version: "2025-07-01"
+  native_in_azurerm: false
+  preview: false
+  feature_flag: premium_ingress
+  module: container_app_environment
+
 # =============================================================================
 # Container App
 # =============================================================================

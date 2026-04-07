@@ -163,6 +163,14 @@
       "module_supported": false,
       "example": null,
       "resource_path": "properties.configuration.ingress.ipSecurityRestrictions"
+    },
+    {
+      "name": "premium_ingress",
+      "api_version_introduced": "2025-07-01",
+      "azurerm_supported": false,
+      "module_supported": true,
+      "example": "premium_ingress",
+      "resource_path": "Microsoft.App/managedEnvironments.properties.ingressConfiguration"
     }
   ]
 }

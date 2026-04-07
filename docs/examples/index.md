@@ -12,7 +12,7 @@ prev_page:
 ---
 
 <p class="lead">
-All 15 examples have been deployed and validated on Azure. Each example is self-contained
+All 16 examples have been deployed and validated on Azure. Each example is self-contained
 with its own <code>main.tf</code>, <code>variables.tf</code>, <code>outputs.tf</code>, and <code>README.md</code>.
 </p>
 

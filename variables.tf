@@ -76,8 +76,9 @@ variable "environment" {
       zone_redundancy_enabled       - Enable zone redundancy
       mutual_tls_enabled            - Enable mutual TLS
       workload_profile              - List of workload profile configs
+      ingress_configuration         - Premium Ingress (dedicated ingress workload profile)
       infrastructure_resource_group_name - Custom infra RG name
-      feature_flags                 - Preview feature flags
+      feature_flags                 - Preview feature flags (premium_ingress, peer_authentication)
       provider_overrides            - Provider routing overrides
   EOT
   type        = any

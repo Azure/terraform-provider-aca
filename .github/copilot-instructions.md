@@ -18,7 +18,7 @@ and transparently uses AzAPI for preview/unsupported features. The key design pa
 │   ├── jobs/                   # Container App Jobs
 │   ├── networking/             # VNet, subnet, NSG
 │   └── observability/          # Log Analytics, App Insights
-├── examples/                   # 15 deployable examples (each has main.tf, variables.tf, outputs.tf, terraform.tfvars)
+├── examples/                   # 16 deployable examples (each has main.tf, variables.tf, outputs.tf, terraform.tfvars)
 ├── docs/
 │   ├── api-versions.json       # Registry of tracked ACA API versions and feature coverage
 │   └── migration-guide.md

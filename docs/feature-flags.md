@@ -174,6 +174,62 @@ custom_scale_rules = [
 
 See: [Autoscaling example]({{ '/examples/autoscaling' | relative_url }})
 
+---
+
+### `premium_ingress`
+
+Enables Premium Ingress on the Container App Environment. Runs ingress proxies on a
+dedicated workload profile instead of shared infrastructure, giving operators control
+over SKU, autoscale range, and connection tuning.
+
+| | |
+|---|---|
+| **Provider** | AzAPI |
+| **API Version** | `2025-07-01` |
+| **AzureRM Support** | ❌ Not supported ([PR #31847](https://github.com/hashicorp/terraform-provider-azurerm/pull/31847) pending) |
+
+**Scope:** Environment-level (`feature_flags` on the `environment` block)
+
+**Unlocks:**
+- `ingress_configuration.workload_profile_name` — dedicated ingress profile name (default: `premium-ingress`)
+- `ingress_configuration.workload_profile_type` — SKU: D4/D8/D16/D32 (default: D4)
+- `ingress_configuration.minimum_node_count` / `maximum_node_count` — autoscale range
+- `ingress_configuration.termination_grace_period_minutes` — graceful connection draining
+- `ingress_configuration.request_idle_timeout` — idle connection timeout
+- `ingress_configuration.header_count_limit` — max HTTP headers per request
+
+**Example (defaults):**
+
+```hcl
+environment = {
+  feature_flags = {
+    premium_ingress = true
+  }
+  ingress_configuration = {}
+}
+```
+
+**Example (full control):**
+
+```hcl
+environment = {
+  feature_flags = {
+    premium_ingress = true
+  }
+  ingress_configuration = {
+    workload_profile_name            = "my-ingress"
+    workload_profile_type            = "D8"
+    minimum_node_count               = 3
+    maximum_node_count               = 15
+    termination_grace_period_minutes = 2
+    request_idle_timeout             = 6
+    header_count_limit               = 200
+  }
+}
+```
+
+See: [Premium Ingress example]({{ '/examples/premium-ingress' | relative_url }})
+
 ## Feature Lifecycle
 
 ```

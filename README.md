@@ -134,7 +134,7 @@ module "aca" {
 
 ## Examples
 
-All 15 examples have been deployed and validated on Azure.
+All 16 examples have been deployed and validated on Azure.
 
 | Example | Complexity | Key Features |
 |---------|------------|--------------|
@@ -153,6 +153,7 @@ All 15 examples have been deployed and validated on Azure.
 | [`cors_api`](examples/cors_api/) | ⭐⭐ | Frontend + API with CORS policy via AzAPI overlay |
 | [`java_spring`](examples/java_spring/) | ⭐⭐⭐ | Eureka + Config Server via AzAPI Java components |
 | [`init_containers`](examples/init_containers/) | ⭐⭐ | Init containers with shared EmptyDir volumes |
+| [`premium_ingress`](examples/premium_ingress/) | ⭐⭐ | Premium Ingress with dedicated workload profile via AzAPI |
 
 ## Architecture
 
