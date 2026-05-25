@@ -65,10 +65,19 @@ resource "azurerm_subnet" "sandbox" {
   virtual_network_name = azurerm_virtual_network.this.name
   address_prefixes     = ["10.50.0.0/23"]
 
-  # Sandbox groups apply their own subnet delegation
-  # (Microsoft.App/sandboxGroups) at provision time. AzureRM's allow-list does
-  # not yet include this delegation name, so leave it unset here and let the
-  # platform manage it. Drift on the delegation block is expected.
+  # Sandbox group vnetConnections require the subnet to carry the
+  # Microsoft.App/environments delegation (verified empirically against the
+  # 2026-02-01-preview API). AzureRM accepts this delegation name today, so
+  # we pre-delegate here. `ignore_changes` covers any future drift where
+  # the sandbox-groups RP swaps the delegation under the hood.
+  delegation {
+    name = "Microsoft.App.environments"
+    service_delegation {
+      name    = "Microsoft.App/environments"
+      actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
+    }
+  }
+
   lifecycle {
     ignore_changes = [delegation]
   }

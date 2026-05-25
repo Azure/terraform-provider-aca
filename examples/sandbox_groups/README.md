@@ -64,7 +64,7 @@ graph TD
 
     subgraph RG["Resource Group: tf-aca-18"]
         VNET["VNet 10.50.0.0/16"]
-        SUBNET["Subnet 10.50.0.0/23<br/>delegation: Microsoft.App/sandboxGroups"]
+        SUBNET["Subnet 10.50.0.0/23<br/>delegation: Microsoft.App/environments"]
         SG["sandboxGroups/agents<br/>2 vCPU · 4 GiB · 32 GiB disk<br/>maxSandboxCount = 50<br/>SystemAssigned identity"]
         VC["sandboxGroups/vnetConnections/primary"]
     end
@@ -97,7 +97,7 @@ graph TD
 |---|---|---|
 | Resource Group | AzureRM | Container for all resources |
 | VNet (`10.50.0.0/16`) | AzureRM | Sandbox networking |
-| Subnet (`10.50.0.0/23`) | AzureRM | Delegated to `Microsoft.App/sandboxGroups` |
+| Subnet (`10.50.0.0/23`) | AzureRM | Delegated to `Microsoft.App/environments` (required by `vnetConnections`) |
 | `sandboxGroups/agents` | **AzAPI** (via module) | The group itself |
 | `sandboxGroups/vnetConnections/primary` | **AzAPI** (via module) | Binds the group to the subnet |
 

@@ -82,14 +82,12 @@ resource "azapi_resource" "vnet_connection" {
   type                      = "Microsoft.App/sandboxGroups/vnetConnections@${var.api_version}"
   name                      = each.key
   parent_id                 = azapi_resource.this.id
+  location                  = var.location
   schema_validation_enabled = false
 
   body = {
-    request = {
-      location = var.location
-      properties = {
-        subnetId = each.value.subnet_id
-      }
+    properties = {
+      subnetId = each.value.subnet_id
     }
   }
 }
