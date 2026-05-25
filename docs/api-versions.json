@@ -2,14 +2,16 @@
   "$schema": "./api-versions.schema.json",
   "description": "Registry of ACA API versions and feature coverage status. Update this file when a new API version is published by the ACA team to trigger the coverage workflow.",
   "latest_api_version": "2025-07-01",
-  "latest_preview_version": "2025-10-02-preview",
+  "latest_preview_version": "2026-02-01-preview",
   "api_specs_path": "specification/app/resource-manager/Microsoft.App/ContainerApps",
   "resource_types": {
     "Microsoft.App/containerApps": "2025-07-01",
     "Microsoft.App/managedEnvironments": "2025-07-01",
     "Microsoft.App/managedEnvironments/javaComponents": "2025-07-01",
     "Microsoft.App/sessionPools": "2025-07-01",
-    "Microsoft.App/jobs": "2025-07-01"
+    "Microsoft.App/jobs": "2025-07-01",
+    "Microsoft.App/sandboxGroups": "2026-02-01-preview",
+    "Microsoft.App/sandboxGroups/vnetConnections": "2026-02-01-preview"
   },
   "features": [
     {
@@ -171,6 +173,22 @@
       "module_supported": true,
       "example": "premium_ingress",
       "resource_path": "Microsoft.App/managedEnvironments.properties.ingressConfiguration"
+    },
+    {
+      "name": "express_mode",
+      "api_version_introduced": "2025-10-02-preview",
+      "azurerm_supported": false,
+      "module_supported": true,
+      "example": "express_mode",
+      "resource_path": "Microsoft.App/managedEnvironments.properties.environmentMode"
+    },
+    {
+      "name": "sandbox_groups",
+      "api_version_introduced": "2026-02-01-preview",
+      "azurerm_supported": false,
+      "module_supported": true,
+      "example": "sandbox_groups",
+      "resource_path": "Microsoft.App/sandboxGroups"
     }
   ]
 }

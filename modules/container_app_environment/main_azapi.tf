@@ -57,3 +57,30 @@ resource "azapi_update_resource" "ingress_configuration" {
 
   depends_on = [azurerm_container_app_environment.this]
 }
+
+# ---------------------------------------------------------------------------
+# Express mode — flips environmentMode to "Express" via a preview API version.
+#
+# Express is a fully serverless mode of Microsoft.App/managedEnvironments. The
+# only difference vs. a standard environment is the `environmentMode` property,
+# which is silently dropped by GA API versions — so a preview overlay is
+# mandatory (the AzureRM provider currently targets a GA version).
+# ---------------------------------------------------------------------------
+
+resource "azapi_update_resource" "express_mode" {
+  count = (
+    var.feature_flags.express_mode &&
+    lookup(var.provider_overrides, "express_mode", "azapi") == "azapi"
+  ) ? 1 : 0
+
+  type        = "Microsoft.App/managedEnvironments@${var.express_api_version}"
+  resource_id = azurerm_container_app_environment.this.id
+
+  body = {
+    properties = {
+      environmentMode = "Express"
+    }
+  }
+
+  depends_on = [azurerm_container_app_environment.this]
+}

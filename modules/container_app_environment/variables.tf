@@ -90,8 +90,24 @@ variable "feature_flags" {
   type = object({
     peer_authentication = optional(bool, false)
     premium_ingress     = optional(bool, false)
+    express_mode        = optional(bool, false)
   })
   default = {}
+}
+
+# ---------------------------------------------------------------------------
+# Express mode
+# ---------------------------------------------------------------------------
+
+variable "express_api_version" {
+  description = <<-EOT
+    API version used by the Express-mode AzAPI overlay. The `environmentMode`
+    property on `Microsoft.App/managedEnvironments` is only honored by preview
+    API versions (GA versions silently drop it). Override only if a newer
+    preview version is required.
+  EOT
+  type        = string
+  default     = "2025-10-02-preview"
 }
 
 # ---------------------------------------------------------------------------

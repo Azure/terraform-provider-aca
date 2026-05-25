@@ -62,6 +62,7 @@ module "environment" {
   workload_profile                            = try(var.environment.workload_profile, [])
   ingress_configuration                       = try(var.environment.ingress_configuration, null)
   feature_flags                               = try(var.environment.feature_flags, {})
+  express_api_version                         = try(var.environment.express_api_version, "2025-10-02-preview")
   provider_overrides                          = try(var.environment.provider_overrides, {})
   tags                                        = var.tags
 }
@@ -120,4 +121,36 @@ module "job" {
 
   feature_flags      = try(each.value.feature_flags, {})
   provider_overrides = try(each.value.provider_overrides, {})
+}
+
+# ---------------------------------------------------------------------------
+# Sandbox Groups (ACA Sandboxes — early access, AzAPI-only)
+# ---------------------------------------------------------------------------
+
+data "azurerm_resource_group" "sandbox_groups" {
+  count = length(var.sandbox_groups) > 0 ? 1 : 0
+  name  = var.resource_group_name
+}
+
+module "sandbox_group" {
+  source   = "./modules/sandbox_groups"
+  for_each = var.sandbox_groups
+
+  name              = try(each.value.name, "${var.name}-${each.key}")
+  resource_group_id = data.azurerm_resource_group.sandbox_groups[0].id
+  location          = try(each.value.location, var.location)
+
+  default_cpu             = try(each.value.default_cpu, "1")
+  default_memory          = try(each.value.default_memory, "2Gi")
+  default_disk            = try(each.value.default_disk, "20Gi")
+  max_sandbox_count       = try(each.value.max_sandbox_count, 50)
+  default_timeout_seconds = try(each.value.default_timeout_seconds, 3600)
+
+  network_config      = try(each.value.network_config, null)
+  identity            = try(each.value.identity, null)
+  gateway_connections = try(each.value.gateway_connections, [])
+  vnet_connections    = try(each.value.vnet_connections, {})
+
+  api_version = try(each.value.api_version, "2026-02-01-preview")
+  tags        = merge(var.tags, try(each.value.tags, {}))
 }

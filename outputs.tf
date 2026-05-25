@@ -80,3 +80,22 @@ output "jobs" {
     }
   }
 }
+
+# ---------------------------------------------------------------------------
+# Sandbox Groups
+# ---------------------------------------------------------------------------
+
+output "sandbox_groups" {
+  description = "Map of Sandbox Group outputs keyed by group identifier."
+  value = {
+    for k, v in module.sandbox_group : k => {
+      id                  = v.id
+      name                = v.name
+      location            = v.location
+      management_endpoint = v.management_endpoint
+      provisioning_state  = v.provisioning_state
+      principal_id        = v.principal_id
+      vnet_connection_ids = v.vnet_connection_ids
+    }
+  }
+}

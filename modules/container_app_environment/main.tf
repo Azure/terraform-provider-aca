@@ -47,5 +47,33 @@ resource "azurerm_container_app_environment" "this" {
       condition     = var.ingress_configuration == null || !var.feature_flags.premium_ingress || !contains([for wp in var.workload_profile : wp.name], var.ingress_configuration.workload_profile_name)
       error_message = "ingress_configuration.workload_profile_name conflicts with a user-defined workload_profile. The dedicated ingress profile is auto-managed and must not be duplicated."
     }
+
+    # Express-mode environments are a managed offering with no VNet integration,
+    # no workload profiles, and no Premium Ingress. Surface a clear error here
+    # rather than letting the ARM control plane reject the AzAPI patch.
+    precondition {
+      condition     = !var.feature_flags.express_mode || var.infrastructure_subnet_id == null
+      error_message = "feature_flags.express_mode = true is incompatible with infrastructure_subnet_id. Express environments do not support VNet integration."
+    }
+
+    precondition {
+      condition     = !var.feature_flags.express_mode || length(var.workload_profile) == 0
+      error_message = "feature_flags.express_mode = true is incompatible with workload_profile. Express environments run on a managed, fully serverless backend."
+    }
+
+    precondition {
+      condition     = !var.feature_flags.express_mode || !var.feature_flags.premium_ingress
+      error_message = "feature_flags.express_mode and feature_flags.premium_ingress are mutually exclusive. Premium Ingress requires a dedicated workload profile."
+    }
+
+    precondition {
+      condition     = !var.feature_flags.express_mode || !var.zone_redundancy_enabled
+      error_message = "feature_flags.express_mode = true is incompatible with zone_redundancy_enabled. Zone redundancy is managed by the Express platform."
+    }
+
+    precondition {
+      condition     = !var.feature_flags.express_mode || !var.internal_load_balancer_enabled
+      error_message = "feature_flags.express_mode = true is incompatible with internal_load_balancer_enabled. Express environments are public-facing."
+    }
   }
 }

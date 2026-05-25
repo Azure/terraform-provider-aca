@@ -78,8 +78,9 @@ variable "environment" {
       workload_profile              - List of workload profile configs
       ingress_configuration         - Premium Ingress (dedicated ingress workload profile)
       infrastructure_resource_group_name - Custom infra RG name
-      feature_flags                 - Preview feature flags (premium_ingress, peer_authentication)
+      feature_flags                 - Preview feature flags (premium_ingress, peer_authentication, express_mode)
       provider_overrides            - Provider routing overrides
+      express_api_version           - Preview API version for the Express overlay (default 2025-10-02-preview)
   EOT
   type        = any
   default     = {}
@@ -138,6 +139,38 @@ variable "jobs" {
       identity                - Managed identity configuration
       feature_flags           - Preview feature flags
       provider_overrides      - Provider routing overrides
+  EOT
+  type        = any
+  default     = {}
+}
+
+# ---------------------------------------------------------------------------
+# Sandbox Groups (ACA Sandboxes — early access)
+# ---------------------------------------------------------------------------
+
+variable "sandbox_groups" {
+  description = <<-EOT
+    Map of Microsoft.App/sandboxGroups (ACA Sandboxes) keyed by group identifier.
+    Sandbox groups are a brand-new ARM resource type with no AzureRM coverage —
+    the module manages them via AzAPI. Individual sandbox CRUD is data-plane only
+    (management.{region}.azuredevcompute.io) and is out of scope for Terraform.
+
+    Required attributes per group:
+      (none beyond the key — sensible defaults are applied)
+
+    Optional attributes per group:
+      name                    - Override sandbox group name (defaults to "{var.name}-{key}")
+      location                - Azure region (defaults to var.location)
+      default_cpu             - Default vCPU per sandbox (e.g. "0.25", "1", "2")
+      default_memory          - Default memory (e.g. "1Gi", "4Gi")
+      default_disk            - Default ephemeral disk size (e.g. "20Gi")
+      max_sandbox_count       - Concurrent sandbox cap
+      default_timeout_seconds - Auto-teardown timeout
+      network_config          - { public_network_access, subnet_id }
+      identity                - { type, identity_ids }
+      gateway_connections     - List of MCP server connections
+      vnet_connections        - Map of child vnet connections keyed by name
+      tags                    - Per-group tags merged on top of root tags
   EOT
   type        = any
   default     = {}

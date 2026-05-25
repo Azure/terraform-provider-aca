@@ -32,3 +32,8 @@ output "platform_reserved_dns_ip_address" {
   description = "The IP address from the IP range defined by platform_reserved_cidr that is reserved for the internal DNS server."
   value       = azurerm_container_app_environment.this.platform_reserved_dns_ip_address
 }
+
+output "environment_mode" {
+  description = "The environmentMode of the managed environment (Express, WorkloadProfiles, or ConsumptionOnly). Reflects the AzAPI overlay when Express mode is enabled."
+  value       = var.feature_flags.express_mode ? "Express" : (length(var.workload_profile) > 0 ? "WorkloadProfiles" : "ConsumptionOnly")
+}
