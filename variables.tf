@@ -172,6 +172,35 @@ variable "sandbox_groups" {
       vnet_connections        - Map of child vnet connections keyed by name
       tags                    - Per-group tags merged on top of root tags
   EOT
-  type        = any
-  default     = {}
+  type = map(object({
+    name                    = optional(string)
+    location                = optional(string)
+    default_cpu             = optional(string)
+    default_memory          = optional(string)
+    default_disk            = optional(string)
+    max_sandbox_count       = optional(number)
+    default_timeout_seconds = optional(number)
+    network_config = optional(object({
+      public_network_access = optional(string)
+      subnet_id             = optional(string)
+    }))
+    identity = optional(object({
+      type         = string
+      identity_ids = optional(list(string), [])
+    }))
+    gateway_connections = optional(list(object({
+      resource_id     = string
+      mcp_runtime_url = optional(string)
+      authentication = optional(object({
+        type                 = string
+        identity_resource_id = optional(string)
+      }))
+    })), [])
+    vnet_connections = optional(map(object({
+      subnet_id = string
+    })), {})
+    tags        = optional(map(string), {})
+    api_version = optional(string)
+  }))
+  default = {}
 }

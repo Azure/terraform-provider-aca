@@ -54,10 +54,11 @@ locals {
 }
 
 resource "azapi_resource" "this" {
-  type      = "Microsoft.App/sandboxGroups@${var.api_version}"
-  name      = var.name
-  location  = var.location
-  parent_id = var.resource_group_id
+  type                      = "Microsoft.App/sandboxGroups@${var.api_version}"
+  name                      = var.name
+  location                  = var.location
+  parent_id                 = var.resource_group_id
+  schema_validation_enabled = false
 
   body = local.body
 
@@ -78,13 +79,17 @@ resource "azapi_resource" "this" {
 resource "azapi_resource" "vnet_connection" {
   for_each = var.vnet_connections
 
-  type      = "Microsoft.App/sandboxGroups/vnetConnections@${var.api_version}"
-  name      = each.key
-  parent_id = azapi_resource.this.id
+  type                      = "Microsoft.App/sandboxGroups/vnetConnections@${var.api_version}"
+  name                      = each.key
+  parent_id                 = azapi_resource.this.id
+  schema_validation_enabled = false
 
   body = {
-    properties = {
-      subnetId = each.value.subnet_id
+    request = {
+      location = var.location
+      properties = {
+        subnetId = each.value.subnet_id
+      }
     }
   }
 }

@@ -127,30 +127,29 @@ module "job" {
 # Sandbox Groups (ACA Sandboxes — early access, AzAPI-only)
 # ---------------------------------------------------------------------------
 
-data "azurerm_resource_group" "sandbox_groups" {
+data "azurerm_client_config" "sandbox_groups" {
   count = length(var.sandbox_groups) > 0 ? 1 : 0
-  name  = var.resource_group_name
 }
 
 module "sandbox_group" {
   source   = "./modules/sandbox_groups"
   for_each = var.sandbox_groups
 
-  name              = try(each.value.name, "${var.name}-${each.key}")
-  resource_group_id = data.azurerm_resource_group.sandbox_groups[0].id
-  location          = try(each.value.location, var.location)
+  name              = coalesce(try(each.value.name, null), "${var.name}-${each.key}")
+  resource_group_id = "/subscriptions/${data.azurerm_client_config.sandbox_groups[0].subscription_id}/resourceGroups/${var.resource_group_name}"
+  location          = coalesce(try(each.value.location, null), var.location)
 
-  default_cpu             = try(each.value.default_cpu, "1")
-  default_memory          = try(each.value.default_memory, "2Gi")
-  default_disk            = try(each.value.default_disk, "20Gi")
-  max_sandbox_count       = try(each.value.max_sandbox_count, 50)
-  default_timeout_seconds = try(each.value.default_timeout_seconds, 3600)
+  default_cpu             = coalesce(try(each.value.default_cpu, null), "1")
+  default_memory          = coalesce(try(each.value.default_memory, null), "2Gi")
+  default_disk            = coalesce(try(each.value.default_disk, null), "20Gi")
+  max_sandbox_count       = coalesce(try(each.value.max_sandbox_count, null), 50)
+  default_timeout_seconds = coalesce(try(each.value.default_timeout_seconds, null), 3600)
 
   network_config      = try(each.value.network_config, null)
   identity            = try(each.value.identity, null)
   gateway_connections = try(each.value.gateway_connections, [])
   vnet_connections    = try(each.value.vnet_connections, {})
 
-  api_version = try(each.value.api_version, "2026-02-01-preview")
+  api_version = coalesce(try(each.value.api_version, null), "2026-02-01-preview")
   tags        = merge(var.tags, try(each.value.tags, {}))
 }

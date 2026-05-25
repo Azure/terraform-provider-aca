@@ -35,6 +35,8 @@ provider "azurerm" {
 
 provider "azapi" {}
 
+data "azurerm_client_config" "current" {}
+
 # ---------------------------------------------------------------------------
 # Resource Group
 # ---------------------------------------------------------------------------
@@ -79,6 +81,8 @@ resource "azurerm_subnet" "sandbox" {
 module "aca" {
   source = "../../"
 
+  depends_on = [azurerm_subnet.sandbox]
+
   name                = var.name
   resource_group_name = azurerm_resource_group.this.name
   location            = azurerm_resource_group.this.location
@@ -98,7 +102,7 @@ module "aca" {
 
       vnet_connections = {
         primary = {
-          subnet_id = azurerm_subnet.sandbox.id
+          subnet_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${azurerm_resource_group.this.name}/providers/Microsoft.Network/virtualNetworks/${azurerm_virtual_network.this.name}/subnets/${azurerm_subnet.sandbox.name}"
         }
       }
 
