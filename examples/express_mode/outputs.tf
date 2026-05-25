@@ -9,18 +9,16 @@ output "environment_default_domain" {
 }
 
 output "environment_mode" {
-  description = "Confirmed environmentMode (should be \"Express\")."
+  description = "environmentMode of the managed environment as reported by the module."
   value       = module.aca.environment_id == null ? null : "Express"
 }
 
-output "api_app_url" {
-  description = "FQDN of the sample app."
-  value       = try(module.aca.container_apps["api"].latest_revision_fqdn, null)
+output "api_app_id" {
+  description = "ARM resource ID of the sample app."
+  value       = azapi_resource.api.id
 }
 
-output "app_urls" {
-  description = "Map of app names to their latest revision FQDNs."
-  value = {
-    for k, v in module.aca.container_apps : k => v.latest_revision_fqdn
-  }
+output "api_app_url" {
+  description = "Public FQDN of the sample app on the Express environment."
+  value       = try("https://${azapi_resource.api.output.properties.configuration.ingress.fqdn}", null)
 }

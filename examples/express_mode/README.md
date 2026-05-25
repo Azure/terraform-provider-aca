@@ -33,9 +33,9 @@ module "aca" {
     }
   }
 
-  container_apps = {
-    api = { ... }
-  }
+  # NOTE: deploy apps onto Express envs via azapi_resource directly,
+  # not through the module's container_apps map (see "Why apps use raw AzAPI"
+  # below).
 }
 ```
 
@@ -44,6 +44,27 @@ zone redundancy, internal load balancers, and Premium Ingress. The module
 enforces this via preconditions and will fail early with a clear error if you
 mix them.
 
+## Why apps use raw AzAPI
+
+The Express RP rejects container apps that include a `probes` array
+(`ExpressEnvironmentFeatureNotSupported: 'Probes' is not supported for container
+app on express environments`). AzureRM's `azurerm_container_app` always
+serializes a `probes` field (even when empty), so apps deployed via the module's
+`container_apps` map will fail to create on an Express env.
+
+This example therefore creates the sample app directly via
+`azapi_resource "Microsoft.App/containerApps@2025-10-02-preview"`, omitting
+`probes` from the body. The Express environment itself is still created and
+managed by the module — only the app is bypassed.
+
+Additionally, the Express mode flip is **asynchronous on the Azure side**: the
+PATCH that switches `environmentMode` to `Express` returns success quickly, but
+the underlying transition takes several minutes. If a container app create
+races ahead, it can return `ManagedEnvironmentNotProvisioned`. In practice,
+Terraform's resource ordering (the env precedes the app) plus AzAPI's own
+provisioning poll handle this — but a re-apply may be needed if the timing is
+unlucky.
+
 ## Resources Created
 
 | Resource | Provider | Purpose |
@@ -51,7 +72,7 @@ mix them.
 | Resource Group | AzureRM | Container for all resources |
 | Container App Environment | AzureRM (via module) | ACA control plane |
 | Express overlay | **AzAPI** (via module) | Sets `environmentMode = "Express"` on the preview API |
-| api app | AzureRM (via module) | Sample helloworld app |
+| api app | **AzAPI** (raw) | Sample helloworld app (raw AzAPI to omit `probes`) |
 
 ## Usage
 
@@ -82,4 +103,3 @@ Express-supported regions (as of writing): `westcentralus`, `eastasia`,
 | `environment_default_domain` | Default domain of the Express environment |
 | `environment_mode` | Confirmed environment mode (`Express`) |
 | `api_app_url` | FQDN of the sample app |
-| `app_urls` | Map of all app names to their FQDNs |

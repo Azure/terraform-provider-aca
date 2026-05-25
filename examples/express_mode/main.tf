@@ -39,7 +39,7 @@ resource "azurerm_resource_group" "this" {
 }
 
 # ---------------------------------------------------------------------------
-# ACA Module — Express Environment + Sample App
+# ACA Module — Express Environment
 # ---------------------------------------------------------------------------
 
 module "aca" {
@@ -58,32 +58,57 @@ module "aca" {
     }
   }
 
-  container_apps = {
-    api = {
-      revision_mode = "Single"
+  # NOTE: container_apps deliberately omitted here. AzureRM's
+  # `azurerm_container_app` resource always emits `properties.template.containers.*.probes`
+  # (even when no probe block is configured), and the Express runtime rejects
+  # any request that contains `probes`:
+  #   ExpressEnvironmentFeatureNotSupported: 'Probes' is not supported for ...
+  # Until AzureRM exposes a way to omit the probes payload (or the Express RP
+  # accepts an empty array), apps targeting Express environments must be
+  # created via AzAPI directly. See the azapi_resource below.
+}
 
-      template = {
-        min_replicas = 1
-        max_replicas = 3
+# ---------------------------------------------------------------------------
+# Sample Container App on the Express environment (via AzAPI)
+# ---------------------------------------------------------------------------
 
-        containers = [{
-          name   = "api"
-          image  = var.container_image
-          cpu    = 0.25
-          memory = "0.5Gi"
+resource "azapi_resource" "api" {
+  type      = "Microsoft.App/containerApps@2025-10-02-preview"
+  name      = "${var.name}-api"
+  location  = azurerm_resource_group.this.location
+  parent_id = azurerm_resource_group.this.id
 
-          env = [
-            { name = "APP_MODE", value = "express" },
-          ]
-        }]
+  body = {
+    properties = {
+      managedEnvironmentId = module.aca.environment_id
+      configuration = {
+        activeRevisionsMode = "Single"
+        ingress = {
+          external      = true
+          targetPort    = 80
+          transport     = "auto"
+          traffic = [{
+            latestRevision = true
+            weight         = 100
+          }]
+        }
       }
-
-      ingress = {
-        external_enabled = true
-        target_port      = 80
-        transport        = "auto"
-        traffic_weight   = [{ latest_revision = true, percentage = 100 }]
+      template = {
+        containers = [{
+          name      = "api"
+          image     = var.container_image
+          resources = { cpu = 0.25, memory = "0.5Gi" }
+          env       = [{ name = "APP_MODE", value = "express" }]
+        }]
+        scale = {
+          minReplicas = 1
+          maxReplicas = 3
+        }
       }
     }
   }
+
+  response_export_values = ["properties.configuration.ingress.fqdn"]
+
+  tags = var.tags
 }
