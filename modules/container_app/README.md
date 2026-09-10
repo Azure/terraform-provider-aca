@@ -1,6 +1,8 @@
 # Container App Module
 
-Thin wrapper around [`azurerm_container_app`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/container_app) with optional **AzAPI overlay** resources for preview features not yet available in AzureRM.
+Uses AzureRM for standard Container Apps, dedicated
+`Microsoft.App/containerApps@2026-03-02-preview` AzAPI resources for Express apps, and
+optional AzAPI overlays for other capabilities not yet available in AzureRM.
 
 ## Design Principles
 
@@ -94,11 +96,49 @@ module "api_preview" {
 }
 ```
 
+## Usage – Express
+
+Set `environment_mode = "Express"` and provide `location`. The module enforces
+the current Express subset: one container, single revision, HTTP ingress,
+manual secrets, user-assigned identity, HTTP/CPU/memory scaling, HTTP/TCP
+probes, CORS/IP restrictions, and ephemeral storage. Volumes and volume mounts
+are rejected because the Express service does not support them.
+
+```hcl
+module "express_app" {
+  source = "../../modules/container_app"
+
+  name                         = "express-api"
+  location                     = "swedencentral"
+  resource_group_name          = azurerm_resource_group.this.name
+  container_app_environment_id = module.express_environment.id
+  environment_mode             = "Express"
+  revision_mode                = "Single"
+
+  template = {
+    containers = [{
+      name   = "api"
+      image  = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
+      cpu    = 0.25
+      memory = "0.5Gi"
+    }]
+  }
+
+  ingress = {
+    external_enabled = true
+    target_port      = 80
+    transport        = "http"
+  }
+}
+```
+
 ## Inputs
 
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
 | `name` | `string` | yes | Container App name |
+| `location` | `string` | Express only | Azure region |
+| `environment_mode` | `string` | no | Target environment mode |
 | `resource_group_name` | `string` | yes | Resource group name |
 | `container_app_environment_id` | `string` | yes | Environment ID |
 | `revision_mode` | `string` | yes | `Single` or `Multiple` |
@@ -113,6 +153,7 @@ module "api_preview" {
 | `feature_flags` | `object` | no | Toggle AzAPI overlay features |
 | `provider_overrides` | `map(string)` | no | Override provider per feature flag |
 | `additional_port_mappings` | `list(object)` | no | Extra port mappings (preview) |
+| `outbound_vnet_subnet_id` | `string` | no | Immutable Express app-level outbound subnet |
 
 ## Outputs
 

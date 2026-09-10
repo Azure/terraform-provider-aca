@@ -1,92 +1,75 @@
-# `modules/sandbox_groups`
+# ACA Sandbox Groups
 
-Terraform sub-module for **Azure Container Apps Sandbox Groups**
-(`Microsoft.App/sandboxGroups`) — an early-access ACA product that provisions a
-pool of disposable Linux VMs ("sandboxes") suitable for AI agent code execution,
-untrusted code sandboxing, and per-tenant compute isolation.
+Manages the ARM control plane for Azure Container Apps Sandboxes:
 
-This resource type is **not yet supported by AzureRM**, so the module talks
-directly to ARM via [`azapi_resource`](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource).
+- `Microsoft.App/sandboxGroups`;
+- `Microsoft.App/sandboxGroups/vnetConnections`;
+- optional SandboxGroup Data Owner role assignments;
+- optional AcrPull assignments for the group identity;
+- optional `CanNotDelete` management lock.
 
-## Two-plane model (important)
+Individual Sandboxes, disks, snapshots, volumes, files, secrets, ports, and
+egress policies use the regional ACA data plane. They are not ARM resources and
+are not managed by this module.
 
-| Plane | Endpoint | Resources |
+## API profiles
+
+| Profile | API | Supported inputs |
 |---|---|---|
-| **ARM control plane** | `management.azure.com` | `Microsoft.App/sandboxGroups`, `Microsoft.App/sandboxGroups/vnetConnections` |
-| **ADC data plane** | `management.{region}.azuredevcompute.io` | Individual sandboxes, disk images, snapshots, volumes, ports, egress policies |
+| `stable` (default) | `2026-02-01-preview` | tags and VNet connections; minimal stable-shaped body |
+| `rich_preview` | `2026-02-01-preview` | group CPU/memory/disk defaults, maximum count, timeout, managed identity, VNet connections |
 
-This module **only manages the ARM control plane**. Individual sandbox CRUD
-happens against the data plane (via the `aca` CLI, REST, or the ADC SDK) using
-the `management_endpoint` output as the base URL.
-
-## Usage
+The profile name controls the field set, not API maturity. Azure currently
+registers only `2026-02-01-preview` for Sandbox Groups, so both profiles use it
+by default. The `stable` profile sends a minimal body and does not inject
+preview defaults. `environment_id` is retained for forward compatibility and
+requires an explicit `api_version` override to a registered contract that
+exposes that field.
 
 ```hcl
-module "sbx" {
+module "sandbox_group" {
   source = "github.com/Azure/terraform-provider-aca//modules/sandbox_groups"
 
   name              = "agent-sandboxes"
-  resource_group_id = azurerm_resource_group.rg.id
-  location          = "eastus2"
-
-  default_cpu             = "2"
-  default_memory          = "4Gi"
-  default_disk            = "32Gi"
-  max_sandbox_count       = 50
-  default_timeout_seconds = 3600
+  resource_group_id = azurerm_resource_group.this.id
+  location          = "swedencentral"
+  api_profile       = "rich_preview"
 
   identity = {
     type = "SystemAssigned"
   }
 
+  default_cpu       = "2"
+  default_memory    = "4Gi"
+  default_disk      = "32Gi"
+  max_sandbox_count = 10
+
   vnet_connections = {
-    primary = { subnet_id = azurerm_subnet.sbx.id }
+    primary = {
+      subnet_id = azurerm_subnet.sandbox.id
+    }
   }
 
-  tags = { environment = "dev" }
-}
+  data_plane_operators = {
+    caller = {
+      principal_id   = data.azurerm_client_config.current.object_id
+      principal_type = "User"
+    }
+  }
 
-output "adc_endpoint" {
-  value = module.sbx.management_endpoint
+  acr_pull_assignments = {
+    images = {
+      scope = azurerm_container_registry.this.id
+    }
+  }
+
+  lock_enabled = true
 }
 ```
 
-## Variables
+The VNet subnet must be delegated to `Microsoft.App/environments`. A VNet
+connection's subnet cannot be changed after creation.
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `name` | string | — | Sandbox group name (2-64 chars, start with a letter). |
-| `resource_group_id` | string | — | Resource ID of the parent resource group. |
-| `location` | string | — | Azure region. |
-| `default_cpu` | string | `"1"` | Default vCPU per sandbox (e.g. `"0.25"`, `"1"`, `"2"`). |
-| `default_memory` | string | `"2Gi"` | Default memory per sandbox (`Gi` suffix). |
-| `default_disk` | string | `"20Gi"` | Default ephemeral disk size. |
-| `max_sandbox_count` | number | `50` | Concurrent sandbox cap. |
-| `default_timeout_seconds` | number | `3600` | Auto-teardown timeout. |
-| `network_config` | object | `null` | Inline network config (`public_network_access`, `subnet_id`). |
-| `identity` | object | `null` | Managed identity (`type`, `identity_ids`). |
-| `gateway_connections` | list(object) | `[]` | MCP server connections. |
-| `vnet_connections` | map(object) | `{}` | Map of `vnetConnections` child resources keyed by name. |
-| `tags` | map(string) | `{}` | Resource tags. |
-| `api_version` | string | `"2026-02-01-preview"` | Preview API version. |
-
-## Outputs
-
-| Name | Description |
-|---|---|
-| `id` | Full ARM resource ID. |
-| `name` | Resource name. |
-| `management_endpoint` | ADC data-plane endpoint. |
-| `provisioning_state` | Last reported provisioning state. |
-| `principal_id` | System-assigned identity principal ID (when enabled). |
-| `vnet_connection_ids` | Map of child VNet connection IDs. |
-
-## RBAC
-
-The caller deploying sandboxes against the data plane needs the
-**Container Apps SandboxGroup Data Owner** role on the sandbox group (or its
-parent resource group / subscription).
-
-## API versions
-
-Tracked in `docs/api-versions.json` under the `sandbox_groups` feature entry.
+Use `experimental/sandbox_workload` when Terraform-driven create-or-reuse
+orchestration is needed for individual data-plane Sandboxes. That companion
+never deletes data-plane resources during destroy.

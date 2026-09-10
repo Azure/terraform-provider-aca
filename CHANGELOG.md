@@ -4,6 +4,41 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+
+- Azure Container Apps Express environments and apps through dedicated AzAPI
+  resources using the currently deployed `2026-03-02-preview` ARM contract.
+- Explicit `environment_mode` with compatibility support for
+  `feature_flags.express_mode`.
+- Express support for HTTP/TCP probes, HTTP/CPU/memory scaling, CORS, IP
+  restrictions, ephemeral storage, user-assigned identity, and outbound VNet
+  subnets within current preview constraints.
+- Minimal stable-shaped and rich-preview ACA Sandbox Group profiles, VNet connections,
+  role assignments, and optional deletion locks.
+- Experimental ACA CLI-backed Sandbox workload create-or-reuse companion with
+  preservation-only destroy semantics.
+- Express, Sandbox Group, and Python Sandbox code-interpreter examples.
+- Native Go Terraform provider for Sandbox and private disk-image data-plane
+  resources, including imports, updates, retention, polling, write-only
+  credentials, and read-only data sources.
+- Deployable native-provider examples for public Ubuntu Sandboxes and
+  ACR-backed private disk images using repository-scoped credentials.
+- Safe migration guidance for moving pre-existing Express state from the
+  earlier AzureRM-plus-overlay implementation to the dedicated AzAPI resources.
+
+### Changed
+
+- API coverage tracks the published Microsoft.App `2026-07-01` specification
+  separately from the currently registered Express and Sandbox runtime APIs.
+- AzureRM compatibility is explicitly constrained to the supported 4.x
+  provider line.
+- Terraform tests now use provider mocks and root-relative module paths.
+- Disk-image registry authentication accepts both SDK-style managed identity
+  selectors and the newer client-ID contract, and handles computed write-only
+  registry tokens correctly during planning.
+
 ## [0.1.0] - 2025-03-10
 
 ### Added

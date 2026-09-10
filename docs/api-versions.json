@@ -1,17 +1,23 @@
 {
   "$schema": "./api-versions.schema.json",
-  "description": "Registry of ACA API versions and feature coverage status. Update this file when a new API version is published by the ACA team to trigger the coverage workflow.",
-  "latest_api_version": "2025-07-01",
-  "latest_preview_version": "2026-02-01-preview",
+  "description": "Registry of published ACA API specifications, module runtime defaults, and feature coverage status. Update this file when a new API version is published by the ACA team to trigger the coverage workflow.",
+  "latest_api_version": "2026-07-01",
+  "latest_preview_version": "2026-03-02-preview",
   "api_specs_path": "specification/app/resource-manager/Microsoft.App/ContainerApps",
-  "resource_types": {
-    "Microsoft.App/containerApps": "2025-07-01",
-    "Microsoft.App/managedEnvironments": "2025-07-01",
-    "Microsoft.App/managedEnvironments/javaComponents": "2025-07-01",
-    "Microsoft.App/sessionPools": "2025-07-01",
-    "Microsoft.App/jobs": "2025-07-01",
+  "runtime_defaults": {
+    "Microsoft.App/containerApps": "2026-03-02-preview",
+    "Microsoft.App/managedEnvironments": "2026-03-02-preview",
     "Microsoft.App/sandboxGroups": "2026-02-01-preview",
     "Microsoft.App/sandboxGroups/vnetConnections": "2026-02-01-preview"
+  },
+  "resource_types": {
+    "Microsoft.App/containerApps": "2026-07-01",
+    "Microsoft.App/managedEnvironments": "2026-07-01",
+    "Microsoft.App/managedEnvironments/javaComponents": "2026-07-01",
+    "Microsoft.App/sessionPools": "2026-07-01",
+    "Microsoft.App/jobs": "2026-07-01",
+    "Microsoft.App/sandboxGroups": "2026-07-01",
+    "Microsoft.App/sandboxGroups/vnetConnections": "2026-07-01"
   },
   "features": [
     {
@@ -176,11 +182,19 @@
     },
     {
       "name": "express_mode",
-      "api_version_introduced": "2025-10-02-preview",
+      "api_version_introduced": "2026-03-02-preview",
       "azurerm_supported": false,
       "module_supported": true,
       "example": "express_mode",
       "resource_path": "Microsoft.App/managedEnvironments.properties.environmentMode"
+    },
+    {
+      "name": "express_container_apps",
+      "api_version_introduced": "2026-03-02-preview",
+      "azurerm_supported": false,
+      "module_supported": true,
+      "example": "express_mode",
+      "resource_path": "Microsoft.App/containerApps"
     },
     {
       "name": "sandbox_groups",
@@ -189,6 +203,22 @@
       "module_supported": true,
       "example": "sandbox_groups",
       "resource_path": "Microsoft.App/sandboxGroups"
+    },
+    {
+      "name": "sandbox_groups_rich_preview",
+      "api_version_introduced": "2026-02-01-preview",
+      "azurerm_supported": false,
+      "module_supported": true,
+      "example": "sandbox_code_interpreter",
+      "resource_path": "Microsoft.App/sandboxGroups preview properties"
+    },
+    {
+      "name": "sandbox_workloads",
+      "api_version_introduced": "2026-02-01-preview",
+      "azurerm_supported": false,
+      "module_supported": true,
+      "example": "sandbox_code_interpreter",
+      "resource_path": "ACA Sandbox regional data plane"
     }
   ]
 }

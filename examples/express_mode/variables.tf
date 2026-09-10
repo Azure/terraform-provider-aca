@@ -11,9 +11,9 @@ variable "resource_group_name" {
 }
 
 variable "location" {
-  description = "Azure region. Must be an Express-supported region (e.g. westcentralus, eastasia, northcentralus)."
+  description = "Azure region that supports Express."
   type        = string
-  default     = "northcentralus"
+  default     = "swedencentral"
 }
 
 variable "tags" {
@@ -22,7 +22,7 @@ variable "tags" {
   default = {
     environment = "dev"
     managed_by  = "terraform"
-    pattern     = "ExpressMode"
+    pattern     = "express"
   }
 }
 

@@ -7,9 +7,32 @@ variable "name" {
   type        = string
 }
 
+variable "location" {
+  description = "The Azure region where the Container App should exist. Required for Express apps created through AzAPI."
+  type        = string
+  default     = null
+}
+
 variable "resource_group_name" {
   description = "The name of the resource group in which to create the Container App."
   type        = string
+}
+
+variable "environment_mode" {
+  description = "Mode of the target Container Apps environment."
+  type        = string
+  default     = "WorkloadProfiles"
+
+  validation {
+    condition     = contains(["WorkloadProfiles", "ConsumptionOnly", "Express"], var.environment_mode)
+    error_message = "environment_mode must be one of: WorkloadProfiles, ConsumptionOnly, Express."
+  }
+}
+
+variable "express_api_version" {
+  description = "API version used to create Express Container Apps through AzAPI."
+  type        = string
+  default     = "2026-03-02-preview"
 }
 
 variable "container_app_environment_id" {
@@ -35,10 +58,13 @@ variable "template" {
   EOT
   type = object({
     containers = list(object({
-      name   = string
-      image  = string
-      cpu    = number
-      memory = string
+      name              = string
+      image             = string
+      cpu               = number
+      memory            = string
+      command           = optional(list(string))
+      args              = optional(list(string))
+      ephemeral_storage = optional(string)
       env = optional(list(object({
         name        = string
         value       = optional(string)
@@ -75,6 +101,16 @@ variable "template" {
     min_replicas    = optional(number)
     max_replicas    = optional(number)
     revision_suffix = optional(string)
+    http_scale_rules = optional(list(object({
+      name                = string
+      concurrent_requests = number
+    })), [])
+    custom_scale_rules = optional(list(object({
+      name             = string
+      custom_rule_type = string
+      metadata         = map(string)
+      identity_id      = optional(string)
+    })), [])
   })
 }
 
@@ -97,10 +133,25 @@ variable "tags" {
 variable "ingress" {
   description = "Ingress configuration block."
   type = object({
-    target_port      = number
-    external_enabled = optional(bool, false)
-    transport        = optional(string, "auto")
-    exposed_port     = optional(number)
+    target_port                = number
+    external_enabled           = optional(bool, false)
+    transport                  = optional(string, "auto")
+    exposed_port               = optional(number)
+    allow_insecure_connections = optional(bool, false)
+    cors = optional(object({
+      allow_credentials_enabled = optional(bool, false)
+      allowed_headers           = optional(list(string))
+      allowed_methods           = optional(list(string))
+      allowed_origins           = list(string)
+      exposed_headers           = optional(list(string))
+      max_age_in_seconds        = optional(number)
+    }))
+    ip_security_restrictions = optional(list(object({
+      action           = string
+      description      = optional(string)
+      ip_address_range = string
+      name             = string
+    })), [])
     traffic_weight = optional(list(object({
       percentage      = number
       label           = optional(string)
@@ -109,6 +160,18 @@ variable "ingress" {
     })), [])
   })
   default = null
+}
+
+variable "outbound_vnet_subnet_id" {
+  description = "Optional app-level outbound subnet for an Express app. It is immutable and mutually exclusive with environment-level VNet integration."
+  type        = string
+  default     = null
+}
+
+variable "environment_infrastructure_subnet_id" {
+  description = "Environment-level subnet ID used only to validate Express app-level outbound VNet exclusivity."
+  type        = string
+  default     = null
 }
 
 variable "dapr" {

@@ -72,15 +72,18 @@ variable "environment" {
       (none beyond root-level name, resource_group_name, location)
     
     Optional attributes:
+      environment_mode             - "WorkloadProfiles", "ConsumptionOnly", or "Express"
       internal_load_balancer_enabled - Enable internal load balancer
       zone_redundancy_enabled       - Enable zone redundancy
       mutual_tls_enabled            - Enable mutual TLS
       workload_profile              - List of workload profile configs
       ingress_configuration         - Premium Ingress (dedicated ingress workload profile)
       infrastructure_resource_group_name - Custom infra RG name
-      feature_flags                 - Preview feature flags (premium_ingress, peer_authentication, express_mode)
+      log_analytics_workspace_customer_id - Log Analytics customer ID for Express
+      log_analytics_workspace_shared_key  - Log Analytics shared key for Express
+      feature_flags                 - Preview feature flags (premium_ingress, peer_authentication, express_mode compatibility alias)
       provider_overrides            - Provider routing overrides
-      express_api_version           - Preview API version for the Express overlay (default 2025-10-02-preview)
+      express_api_version           - Express ARM API version (default 2026-03-02-preview)
   EOT
   type        = any
   default     = {}
@@ -107,6 +110,8 @@ variable "container_apps" {
       registry              - Container registry auth
       secret                - Secret definitions
       workload_profile_name - Workload profile to use
+      outbound_vnet_subnet_id - Express app-level outbound subnet
+      express_api_version    - Optional Express app API override
       feature_flags         - Preview feature flags
       provider_overrides    - Provider routing overrides
   EOT
@@ -156,51 +161,56 @@ variable "sandbox_groups" {
     (management.{region}.azuredevcompute.io) and is out of scope for Terraform.
 
     Required attributes per group:
-      (none beyond the key — sensible defaults are applied)
+      (none beyond the key)
 
     Optional attributes per group:
       name                    - Override sandbox group name (defaults to "{var.name}-{key}")
       location                - Azure region (defaults to var.location)
+      api_profile             - "stable" minimal profile (default) or "rich_preview"
+      environment_id          - Optional immutable environment link; requires an explicit supporting API version
       default_cpu             - Default vCPU per sandbox (e.g. "0.25", "1", "2")
       default_memory          - Default memory (e.g. "1Gi", "4Gi")
       default_disk            - Default ephemeral disk size (e.g. "20Gi")
       max_sandbox_count       - Concurrent sandbox cap
       default_timeout_seconds - Auto-teardown timeout
-      network_config          - { public_network_access, subnet_id }
       identity                - { type, identity_ids }
-      gateway_connections     - List of MCP server connections
       vnet_connections        - Map of child vnet connections keyed by name
+      data_plane_operators    - Map of principals granted SandboxGroup Data Owner
+      acr_pull_assignments    - Map of ACR scopes granted to the group identity
+      lock_enabled            - Create a CanNotDelete management lock
       tags                    - Per-group tags merged on top of root tags
   EOT
   type = map(object({
     name                    = optional(string)
     location                = optional(string)
+    api_profile             = optional(string, "stable")
+    environment_id          = optional(string)
     default_cpu             = optional(string)
     default_memory          = optional(string)
     default_disk            = optional(string)
     max_sandbox_count       = optional(number)
     default_timeout_seconds = optional(number)
-    network_config = optional(object({
-      public_network_access = optional(string)
-      subnet_id             = optional(string)
-    }))
     identity = optional(object({
       type         = string
       identity_ids = optional(list(string), [])
     }))
-    gateway_connections = optional(list(object({
-      resource_id     = string
-      mcp_runtime_url = optional(string)
-      authentication = optional(object({
-        type                 = string
-        identity_resource_id = optional(string)
-      }))
-    })), [])
     vnet_connections = optional(map(object({
       subnet_id = string
     })), {})
-    tags        = optional(map(string), {})
-    api_version = optional(string)
+    data_plane_operators = optional(map(object({
+      principal_id                     = string
+      principal_type                   = optional(string)
+      skip_service_principal_aad_check = optional(bool, false)
+    })), {})
+    acr_pull_assignments = optional(map(object({
+      scope                            = string
+      principal_id                     = optional(string)
+      skip_service_principal_aad_check = optional(bool, true)
+    })), {})
+    lock_enabled = optional(bool, false)
+    lock_name    = optional(string, "protect-sandbox-group")
+    tags         = optional(map(string), {})
+    api_version  = optional(string)
   }))
   default = {}
 }

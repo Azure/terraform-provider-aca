@@ -17,6 +17,17 @@ variable "location" {
   type        = string
 }
 
+variable "environment_mode" {
+  description = "Container Apps environment mode. Set to null to infer WorkloadProfiles when profiles are configured and ConsumptionOnly otherwise."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.environment_mode == null || contains(["WorkloadProfiles", "ConsumptionOnly", "Express"], var.environment_mode)
+    error_message = "environment_mode must be null or one of: WorkloadProfiles, ConsumptionOnly, Express."
+  }
+}
+
 # ---------------------------------------------------------------------------
 # Optional arguments – mirrors azurerm_container_app_environment 1:1
 # ---------------------------------------------------------------------------
@@ -25,6 +36,19 @@ variable "log_analytics_workspace_id" {
   description = "The ID of the Log Analytics Workspace to link to this Container App Environment."
   type        = string
   default     = null
+}
+
+variable "log_analytics_workspace_customer_id" {
+  description = "Log Analytics workspace customer ID. Required with log_analytics_workspace_shared_key to enable logs on an Express environment."
+  type        = string
+  default     = null
+}
+
+variable "log_analytics_workspace_shared_key" {
+  description = "Log Analytics workspace shared key. Required with log_analytics_workspace_customer_id to enable logs on an Express environment."
+  type        = string
+  default     = null
+  sensitive   = true
 }
 
 variable "dapr_application_insights_connection_string" {
@@ -101,13 +125,11 @@ variable "feature_flags" {
 
 variable "express_api_version" {
   description = <<-EOT
-    API version used by the Express-mode AzAPI overlay. The `environmentMode`
-    property on `Microsoft.App/managedEnvironments` is only honored by preview
-    API versions (GA versions silently drop it). Override only if a newer
-    preview version is required.
+    API version used to create Express managed environments through AzAPI.
+    Override only for a documented compatibility requirement.
   EOT
   type        = string
-  default     = "2025-10-02-preview"
+  default     = "2026-03-02-preview"
 }
 
 # ---------------------------------------------------------------------------

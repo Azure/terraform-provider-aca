@@ -230,6 +230,34 @@ environment = {
 
 See: [Premium Ingress example]({{ '/examples/premium-ingress' | relative_url }})
 
+---
+
+### `express_mode` compatibility alias
+
+New configurations should set:
+
+```hcl
+environment = {
+  environment_mode = "Express"
+}
+```
+
+Existing configurations can continue to use:
+
+```hcl
+environment = {
+  feature_flags = {
+    express_mode = true
+  }
+}
+```
+
+Both paths create a dedicated AzAPI managed environment and Express apps using
+the currently registered `2026-03-02-preview` ARM contract. Setting the flag with a conflicting explicit
+mode fails at plan time.
+
+See: [Express example]({{ '/examples/express-mode' | relative_url }})
+
 ## Feature Lifecycle
 
 ```

@@ -4,6 +4,8 @@
 # Validates that the observability module creates Log Analytics and
 # Application Insights resources.
 
+mock_provider "azurerm" {}
+
 variables {
   name_prefix         = "test-obs"
   resource_group_name = "rg-test"
@@ -23,7 +25,7 @@ run "observability_creates_workspace" {
   command = plan
 
   module {
-    source = "../../modules/observability"
+    source = "./modules/observability"
   }
 
   assert {
@@ -41,7 +43,7 @@ run "observability_creates_app_insights" {
   command = plan
 
   module {
-    source = "../../modules/observability"
+    source = "./modules/observability"
   }
 
   assert {

@@ -1,12 +1,16 @@
 # Container App Environment
 
-Thin wrapper around [`azurerm_container_app_environment`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/container_app_environment) with an optional **AzAPI overlay** for preview features that have not yet graduated to the AzureRM provider.
+Uses AzureRM for standard Container App Environments and a dedicated AzAPI
+resource for Express environments. Optional AzAPI overlays remain available for
+other features not yet exposed by AzureRM.
 
 ## Design Principles
 
 * **1:1 variable mapping** – every `azurerm_container_app_environment` argument is exposed as a module variable with the same name and type, making brownfield migration straightforward.
 * **Feature flags** – preview capabilities (e.g. `peer_authentication`) are toggled via `feature_flags` and implemented as conditional `azapi_update_resource` resources.
 * **Provider overrides** – once a preview feature lands in AzureRM GA you can set `provider_overrides = { peer_authentication = "azurerm" }` to skip the AzAPI resource.
+* **Express path** – `environment_mode = "Express"` creates
+  `Microsoft.App/managedEnvironments@2026-03-02-preview` directly through AzAPI.
 
 ## Usage
 
@@ -42,6 +46,24 @@ module "container_app_environment" {
 }
 ```
 
+## Express
+
+```hcl
+module "express_environment" {
+  source = "./modules/container_app_environment"
+
+  name                = "my-express"
+  resource_group_name = azurerm_resource_group.example.name
+  location            = "swedencentral"
+  environment_mode    = "Express"
+}
+```
+
+Existing callers can continue using
+`feature_flags = { express_mode = true }` as a compatibility alias. Express
+rejects workload profiles, internal load balancing, zone redundancy, mTLS,
+peer authentication, and premium ingress.
+
 ## Outputs
 
 | Name | Description |
@@ -53,3 +75,4 @@ module "container_app_environment" {
 | `docker_bridge_cidr` | Docker bridge CIDR |
 | `platform_reserved_cidr` | Platform reserved CIDR |
 | `platform_reserved_dns_ip_address` | Platform reserved DNS IP address |
+| `environment_mode` | Resolved environment mode |

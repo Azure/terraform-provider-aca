@@ -1,30 +1,14 @@
-# Sandbox Groups Example — Terraform ACA Extension Layer
-#
-# Demonstrates ACA Sandboxes, a new ACA product that provisions pools of
-# disposable Linux VMs ("sandboxes") for AI agent code execution, untrusted
-# code isolation, and per-tenant ephemeral compute.
-#
-# This example creates:
-#   - A delegated VNet/subnet for sandbox networking
-#   - A Microsoft.App/sandboxGroups resource via AzAPI (no AzureRM support)
-#   - A child Microsoft.App/sandboxGroups/vnetConnections for the subnet
-#   - System-assigned managed identity on the group
-#
-# Note: Individual sandboxes are data-plane resources (management.{region}.
-# azuredevcompute.io) and are NOT ARM-managed. After apply, drive sandbox
-# lifecycle from the `management_endpoint` output via the ACA CLI or SDK.
-
 terraform {
   required_version = ">= 1.5.0"
 
   required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = ">= 4.0.0"
-    }
     azapi = {
       source  = "Azure/azapi"
       version = ">= 2.0.0"
+    }
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = ">= 4.0.0, < 5.0.0"
     }
   }
 }
@@ -37,19 +21,11 @@ provider "azapi" {}
 
 data "azurerm_client_config" "current" {}
 
-# ---------------------------------------------------------------------------
-# Resource Group
-# ---------------------------------------------------------------------------
-
 resource "azurerm_resource_group" "this" {
   name     = var.resource_group_name
   location = var.location
   tags     = var.tags
 }
-
-# ---------------------------------------------------------------------------
-# VNet + delegated subnet for sandbox networking
-# ---------------------------------------------------------------------------
 
 resource "azurerm_virtual_network" "this" {
   name                = "${var.name}-vnet"
@@ -65,13 +41,8 @@ resource "azurerm_subnet" "sandbox" {
   virtual_network_name = azurerm_virtual_network.this.name
   address_prefixes     = ["10.50.0.0/23"]
 
-  # Sandbox group vnetConnections require the subnet to carry the
-  # Microsoft.App/environments delegation (verified empirically against the
-  # 2026-02-01-preview API). AzureRM accepts this delegation name today, so
-  # we pre-delegate here. `ignore_changes` covers any future drift where
-  # the sandbox-groups RP swaps the delegation under the hood.
   delegation {
-    name = "Microsoft.App.environments"
+    name = "sandbox-delegation"
     service_delegation {
       name    = "Microsoft.App/environments"
       actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
@@ -83,41 +54,39 @@ resource "azurerm_subnet" "sandbox" {
   }
 }
 
-# ---------------------------------------------------------------------------
-# ACA Module — Sandbox Group via the top-level sandbox_groups map
-# ---------------------------------------------------------------------------
-
-module "aca" {
-  source = "../../"
+module "sandbox_group" {
+  source = "../../modules/sandbox_groups"
 
   depends_on = [azurerm_subnet.sandbox]
 
-  name                = var.name
-  resource_group_name = azurerm_resource_group.this.name
-  location            = azurerm_resource_group.this.location
-  tags                = var.tags
+  name              = var.name
+  resource_group_id = azurerm_resource_group.this.id
+  location          = azurerm_resource_group.this.location
+  api_profile       = var.api_profile
 
-  sandbox_groups = {
-    agents = {
-      default_cpu             = var.default_cpu
-      default_memory          = var.default_memory
-      default_disk            = var.default_disk
-      max_sandbox_count       = var.max_sandbox_count
-      default_timeout_seconds = var.default_timeout_seconds
+  default_cpu             = var.api_profile == "rich_preview" ? var.default_cpu : null
+  default_memory          = var.api_profile == "rich_preview" ? var.default_memory : null
+  default_disk            = var.api_profile == "rich_preview" ? var.default_disk : null
+  max_sandbox_count       = var.api_profile == "rich_preview" ? var.max_sandbox_count : null
+  default_timeout_seconds = var.api_profile == "rich_preview" ? var.default_timeout_seconds : null
 
-      identity = {
-        type = "SystemAssigned"
-      }
+  identity = var.api_profile == "rich_preview" ? {
+    type = "SystemAssigned"
+  } : null
 
-      vnet_connections = {
-        primary = {
-          subnet_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${azurerm_resource_group.this.name}/providers/Microsoft.Network/virtualNetworks/${azurerm_virtual_network.this.name}/subnets/${azurerm_subnet.sandbox.name}"
-        }
-      }
-
-      tags = {
-        purpose = "agent-code-execution"
-      }
+  vnet_connections = {
+    primary = {
+      subnet_id = azurerm_subnet.sandbox.id
     }
   }
+
+  data_plane_operators = {
+    terraform_caller = {
+      principal_id   = data.azurerm_client_config.current.object_id
+      principal_type = "User"
+    }
+  }
+
+  lock_enabled = var.lock_enabled
+  tags         = var.tags
 }

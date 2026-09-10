@@ -25,6 +25,8 @@ only when needed, with explicit opt-in via feature flags.
 | **Feature flags** | Preview features require explicit opt-in |
 | **Capability registry** | YAML-based feature→provider mapping |
 | **Auto-migration** | Helper script generates state moves when AzureRM catches up |
+| **ACA Express** | Dedicated AzAPI environment and app path for the supported Express subset |
+| **ACA Sandboxes** | Minimal/rich-preview Sandbox Group profiles plus an experimental data-plane companion |
 
 ## Quick Start
 
@@ -134,7 +136,8 @@ module "aca" {
 
 ## Examples
 
-All 16 examples have been deployed and validated on Azure.
+The repository contains 21 examples, including five public-preview examples
+for Express and ACA Sandboxes.
 
 | Example | Complexity | Key Features |
 |---------|------------|--------------|
@@ -154,6 +157,11 @@ All 16 examples have been deployed and validated on Azure.
 | [`java_spring`](examples/java_spring/) | ⭐⭐⭐ | Eureka + Config Server via AzAPI Java components |
 | [`init_containers`](examples/init_containers/) | ⭐⭐ | Init containers with shared EmptyDir volumes |
 | [`premium_ingress`](examples/premium_ingress/) | ⭐⭐ | Premium Ingress with dedicated workload profile via AzAPI |
+| [`express_mode`](examples/express_mode/) | ⭐ | Express environment and app via dedicated AzAPI resources |
+| [`sandbox_groups`](examples/sandbox_groups/) | ⭐⭐⭐ | Stable or rich-preview Sandbox Group with VNet connection and RBAC |
+| [`sandbox_code_interpreter`](examples/sandbox_code_interpreter/) | ⭐⭐⭐ | ACR-backed Python code interpreter through the experimental Sandbox workload companion |
+| [`sandbox_native_public`](examples/sandbox_native_public/) | ⭐⭐ | Native provider Sandbox created from the public Ubuntu disk image |
+| [`sandbox_native_private`](examples/sandbox_native_private/) | ⭐⭐⭐ | Native provider private disk import using a scoped ACR token |
 
 ## Architecture
 
@@ -167,6 +175,7 @@ graph TD
         ENV["modules/container_app_environment<br/><i>Environment · Workload Profiles</i>"]
         APP["modules/container_app<br/><i>for_each container_apps</i>"]
         JOB["modules/jobs<br/><i>for_each jobs</i>"]
+        SG["modules/sandbox_groups<br/><i>Sandbox Group · VNet · RBAC</i>"]
     end
 
     Root -->|"when networking set"| NET
@@ -174,6 +183,7 @@ graph TD
     Root -->|always| ENV
     Root -->|for_each| APP
     Root -->|for_each| JOB
+    Root -->|for_each| SG
 
     NET -->|subnet_id| ENV
     OBS -->|workspace_id| ENV
@@ -185,6 +195,7 @@ graph TD
     style ENV fill:#4A90D9,color:#fff
     style APP fill:#4A90D9,color:#fff
     style JOB fill:#4A90D9,color:#fff
+    style SG fill:#E8833A,color:#fff
 
     AZAPI["AzAPI Overlay<br/><i>Preview features via feature_flags</i>"]
     APP -.->|"when feature_flags set"| AZAPI
@@ -204,6 +215,17 @@ See [architecture.md](architecture.md) for the full architecture reference.
 | [`jobs`](modules/jobs/) | Container App Jobs (scheduled + event-driven) with AzAPI overlay |
 | [`networking`](modules/networking/) | VNet, subnet with delegation handling, and NSG |
 | [`observability`](modules/observability/) | Log Analytics workspace and Application Insights |
+| [`sandbox_groups`](modules/sandbox_groups/) | Stable/rich-preview ACA Sandbox Group control plane via AzAPI |
+| [`sandbox_workload`](experimental/sandbox_workload/) | Experimental ACA CLI-backed Sandbox data-plane create-or-reuse companion |
+
+## Native Sandbox Data-Plane Provider
+
+An initial native Go provider implementation now lives under
+[`provider/`](provider/). It directly manages Sandbox and private disk-image
+data-plane resources without requiring PowerShell, Python, or ACA CLI at
+runtime. The provider remains preview and is not yet published to the public
+Terraform Registry; see [`provider/README.md`](provider/README.md) for build,
+authentication, resource, retention, and migration guidance.
 
 ## Migration Guide
 
@@ -234,6 +256,8 @@ terraform test -test-directory=tests/unit
 | `job_scheduled` | jobs | CRON-based scheduled job |
 | `job_event_driven` | jobs | Event-driven queue job |
 | `observability` | observability | Log Analytics and App Insights |
+| `express_mode` | container_app_environment + container_app | Dedicated Express AzAPI resources and compatibility alias |
+| `sandbox_groups` | sandbox_groups | Stable and rich-preview ARM contracts |
 
 ## Automated API Coverage
 
@@ -248,7 +272,7 @@ gaps, add module support, create examples, and open a PR.
 | Name | Version |
 |------|---------|
 | terraform | >= 1.5.0 |
-| azurerm | >= 4.0.0 |
+| azurerm | >= 4.0.0, < 5.0.0 |
 | azapi | >= 2.0.0 |
 
 ## License

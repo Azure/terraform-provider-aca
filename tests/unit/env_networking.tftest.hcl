@@ -4,6 +4,8 @@
 # Validates that the networking module creates VNet, subnet, and NSG resources
 # with correct configuration.
 
+mock_provider "azurerm" {}
+
 variables {
   name_prefix               = "test-net"
   resource_group_name       = "rg-test"
@@ -20,7 +22,7 @@ run "networking_creates_vnet" {
   command = plan
 
   module {
-    source = "../../modules/networking"
+    source = "./modules/networking"
   }
 
   assert {
@@ -29,7 +31,7 @@ run "networking_creates_vnet" {
   }
 
   assert {
-    condition     = azurerm_virtual_network.this[0].address_space == tolist(["10.0.0.0/16"])
+    condition     = toset(azurerm_virtual_network.this[0].address_space) == toset(["10.0.0.0/16"])
     error_message = "VNet address space should match input."
   }
 }
@@ -38,7 +40,7 @@ run "networking_creates_nsg" {
   command = plan
 
   module {
-    source = "../../modules/networking"
+    source = "./modules/networking"
   }
 
   assert {
@@ -47,11 +49,11 @@ run "networking_creates_nsg" {
   }
 }
 
-run "networking_delegates_subnet" {
+run "networking_leaves_consumption_subnet_undelegated" {
   command = plan
 
   module {
-    source = "../../modules/networking"
+    source = "./modules/networking"
   }
 
   assert {
@@ -60,7 +62,7 @@ run "networking_delegates_subnet" {
   }
 
   assert {
-    condition     = length(azurerm_subnet.aca.delegation) > 0
-    error_message = "Subnet should have a delegation for Microsoft.App/environments."
+    condition     = length(azurerm_subnet.aca.delegation) == 0
+    error_message = "Consumption-only ACA subnets must not be pre-delegated."
   }
 }

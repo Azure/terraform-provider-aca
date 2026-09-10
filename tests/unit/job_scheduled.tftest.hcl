@@ -3,6 +3,8 @@
 # ---------------------------------------------------------------------------
 # Validates that the jobs module accepts valid input for a scheduled job.
 
+mock_provider "azurerm" {}
+
 variables {
   name                         = "test-job-scheduled"
   resource_group_name          = "rg-test"
@@ -32,7 +34,7 @@ run "job_scheduled_validates" {
   command = plan
 
   module {
-    source = "../../modules/jobs"
+    source = "./modules/jobs"
   }
 
   assert {

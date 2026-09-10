@@ -15,7 +15,7 @@ next_page:
 ---
 
 <p class="lead">
-The module is composed of five sub-modules, each responsible for a specific aspect of the
+The module is composed of six stable sub-modules plus one experimental companion, each responsible for a specific aspect of the
 Azure Container Apps deployment. All sub-modules can be used independently or through the
 root module.
 </p>
@@ -43,6 +43,7 @@ container apps and jobs.
 | `id` | The environment resource ID |
 | `default_domain` | The default domain for apps in this environment |
 | `static_ip_address` | The static IP of the environment |
+| `environment_mode` | Resolved WorkloadProfiles, ConsumptionOnly, or Express mode |
 
 ---
 
@@ -51,7 +52,7 @@ container apps and jobs.
 <span class="badge badge-both">AzureRM + AzAPI</span>
 
 Creates a Container App with ingress, Dapr, secrets, and optional AzAPI overlays for
-preview features.
+preview features. Express apps use a dedicated AzAPI create path.
 
 | Input | Type | Description |
 |-------|------|-------------|
@@ -76,6 +77,29 @@ after creating the base AzureRM resource:
 | `advanced_ingress` | Additional port mappings, sticky sessions | 2025-01-01 |
 | `cors_policy` | CORS policy configuration | 2025-01-01 |
 | `custom_scale_rules` | HTTP and KEDA autoscaling rules | 2025-01-01 |
+
+---
+
+## sandbox_groups
+
+<span class="badge badge-azapi">AzAPI</span>
+
+Creates minimal or rich-preview ACA Sandbox Groups, VNet connections, optional
+data-plane operator/AcrPull role assignments, and an optional deletion lock.
+Both profiles default to the currently registered `2026-02-01-preview` API;
+the minimal `stable` profile omits richer defaults and identity.
+
+Individual Sandboxes are data-plane resources and are not managed here.
+
+---
+
+## experimental/sandbox_workload
+
+<span class="badge badge-both">Terraform + ACA CLI</span>
+
+Creates or reuses an immutable-image Sandbox disk and Sandbox through the
+regional ACA data plane. It is explicitly experimental and never deletes
+Sandboxes, disks, snapshots, volumes, files, or secrets during destroy.
 
 ---
 

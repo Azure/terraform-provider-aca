@@ -11,7 +11,7 @@ variable "resource_group_name" {
 }
 
 variable "location" {
-  description = "Azure region. Must support Microsoft.App/sandboxGroups (e.g. swedencentral, eastus2, westus3)."
+  description = "Azure region that supports ACA Sandboxes."
   type        = string
   default     = "swedencentral"
 }
@@ -22,14 +22,21 @@ variable "tags" {
   default = {
     environment = "dev"
     managed_by  = "terraform"
-    pattern     = "SandboxGroups"
+    pattern     = "sandbox-groups"
   }
 }
 
-# ---------------------------------------------------------------------------
-# Sandbox tier — matches the documented M tier (1 vCPU / 2Gi memory)
-# bumped up to give agent workloads enough headroom for code execution.
-# ---------------------------------------------------------------------------
+variable "api_profile" {
+  description = "Use stable for the minimal field profile or rich_preview for defaults and managed identity; both currently use 2026-02-01-preview."
+  type        = string
+  default     = "stable"
+}
+
+variable "lock_enabled" {
+  description = "Create a CanNotDelete lock on the Sandbox Group."
+  type        = bool
+  default     = false
+}
 
 variable "default_cpu" {
   description = "Default vCPU per sandbox."
@@ -56,7 +63,7 @@ variable "max_sandbox_count" {
 }
 
 variable "default_timeout_seconds" {
-  description = "Auto-teardown timeout for idle sandboxes."
+  description = "Rich-preview default Sandbox timeout."
   type        = number
   default     = 3600
 }

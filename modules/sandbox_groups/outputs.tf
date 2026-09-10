@@ -18,6 +18,11 @@ output "management_endpoint" {
   value       = try(azapi_resource.this.output.properties.managementEndpoint, null)
 }
 
+output "default_domain" {
+  description = "Default domain of the linked Container Apps environment when returned by the selected API contract."
+  value       = try(azapi_resource.this.output.properties.defaultDomain, null)
+}
+
 output "provisioning_state" {
   description = "Last reported ARM provisioning state."
   value       = try(azapi_resource.this.output.properties.provisioningState, null)
@@ -36,4 +41,29 @@ output "tenant_id" {
 output "vnet_connection_ids" {
   description = "Map of vnet connection name to ARM resource ID."
   value       = { for k, v in azapi_resource.vnet_connection : k => v.id }
+}
+
+output "api_profile" {
+  description = "Selected Sandbox Group API profile."
+  value       = var.api_profile
+}
+
+output "api_version" {
+  description = "Resolved Sandbox Group API version."
+  value       = local.api_version
+}
+
+output "data_plane_operator_role_assignment_ids" {
+  description = "Map of SandboxGroup Data Owner role assignment IDs."
+  value       = { for k, v in azurerm_role_assignment.data_plane_operator : k => v.id }
+}
+
+output "acr_pull_role_assignment_ids" {
+  description = "Map of AcrPull role assignment IDs."
+  value       = { for k, v in azurerm_role_assignment.acr_pull : k => v.id }
+}
+
+output "management_lock_id" {
+  description = "ID of the optional CanNotDelete management lock."
+  value       = try(azurerm_management_lock.this[0].id, null)
 }
