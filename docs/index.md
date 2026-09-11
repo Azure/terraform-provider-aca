@@ -110,7 +110,7 @@ and applies an `azapi_update_resource` overlay to add the missing properties.
 | Name | Version |
 |------|---------|
 | Terraform | >= 1.5.0 |
-| azurerm | >= 4.0.0 |
+| azurerm | >= 4.0.0, < 5.0.0 |
 | azapi | >= 2.0.0 |
 
 ## 15 Deployment-Tested Examples

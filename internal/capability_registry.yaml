@@ -85,6 +85,16 @@
   feature_flag: premium_ingress
   module: container_app_environment
 
+- feature: environment_express_mode
+  description: Express managed environment using the dedicated AzAPI create path
+  resource_type: Microsoft.App/managedEnvironments
+  provider: azapi
+  api_version: "2026-03-02-preview"
+  native_in_azurerm: false
+  preview: true
+  feature_flag: express_mode
+  module: container_app_environment
+
 # =============================================================================
 # Container App
 # =============================================================================
@@ -179,6 +189,16 @@
   feature_flag: dapr_app_health
   module: container_app
 
+- feature: container_app_express_mode
+  description: Express Container App using the dedicated AzAPI create path
+  resource_type: Microsoft.App/containerApps
+  provider: azapi
+  api_version: "2026-03-02-preview"
+  native_in_azurerm: false
+  preview: true
+  feature_flag: null
+  module: container_app
+
 # =============================================================================
 # Container App Jobs
 # =============================================================================
@@ -260,3 +280,37 @@
   preview: false
   feature_flag: null
   module: observability
+
+# =============================================================================
+# ACA Sandboxes
+# =============================================================================
+
+- feature: sandbox_groups_stable
+  description: Minimal stable-shaped Sandbox Group and VNet connection profile
+  resource_type: Microsoft.App/sandboxGroups
+  provider: azapi
+  api_version: "2026-02-01-preview"
+  native_in_azurerm: false
+  preview: true
+  feature_flag: null
+  module: sandbox_groups
+
+- feature: sandbox_groups_rich_preview
+  description: Preview Sandbox Group defaults and managed identity
+  resource_type: Microsoft.App/sandboxGroups
+  provider: azapi
+  api_version: "2026-02-01-preview"
+  native_in_azurerm: false
+  preview: true
+  feature_flag: null
+  module: sandbox_groups
+
+- feature: sandbox_workload
+  description: Experimental Sandbox disk and workload create-or-reuse orchestration
+  resource_type: ACA Sandbox regional data plane
+  provider: aca_cli
+  api_version: "2026-02-01-preview"
+  native_in_azurerm: false
+  preview: true
+  feature_flag: null
+  module: experimental/sandbox_workload

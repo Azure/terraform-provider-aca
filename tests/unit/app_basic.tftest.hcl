@@ -3,6 +3,9 @@
 # ---------------------------------------------------------------------------
 # Validates that the container_app module accepts valid input for a minimal app.
 
+mock_provider "azurerm" {}
+mock_provider "azapi" {}
+
 variables {
   name                         = "test-app"
   resource_group_name          = "rg-test"
@@ -28,16 +31,16 @@ run "app_basic_validates" {
   command = plan
 
   module {
-    source = "../../modules/container_app"
+    source = "./modules/container_app"
   }
 
   assert {
-    condition     = azurerm_container_app.this.name == "test-app"
+    condition     = azurerm_container_app.this[0].name == "test-app"
     error_message = "Container app name should match input variable."
   }
 
   assert {
-    condition     = azurerm_container_app.this.revision_mode == "Single"
+    condition     = azurerm_container_app.this[0].revision_mode == "Single"
     error_message = "Revision mode should be Single."
   }
 }

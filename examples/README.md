@@ -28,6 +28,8 @@ Variable names match AzureRM 1:1, so migrating from raw `azurerm` to the module 
 | Java Spring (AzAPI) | ~300 lines | ~90 lines | **70%** |
 | Init Containers | ~160 lines | ~50 lines | **69%** |
 | Premium Ingress (AzAPI) | ~200 lines | ~60 lines | **70%** |
+| ACA Express | ~180 lines | ~70 lines | **61%** |
+| Sandbox Group | ~180 lines | ~85 lines | **53%** |
 
 ## Examples Matrix
 
@@ -49,6 +51,11 @@ Variable names match AzureRM 1:1, so migrating from raw `azurerm` to the module 
 | [java_spring](java_spring/) | ⭐⭐⭐ Advanced | Eureka + Config Server via AzAPI Java components + service bindings | RG, LAW, Environment, 2 Java Components (AzAPI), 1 App |
 | [init_containers](init_containers/) | ⭐⭐ Intermediate | Init containers with shared EmptyDir volumes | RG, LAW, Environment, 1 App (init + main container) |
 | [premium_ingress](premium_ingress/) | ⭐⭐ Intermediate | Premium Ingress with dedicated workload profile via AzAPI | RG, LAW, Environment (D4 ingress profile + AzAPI overlay), 1 App |
+| [express_mode](express_mode/) | ⭐ Beginner | Express environment/app, probes, HTTP scaling, CORS, IP restrictions, ephemeral storage | RG, Express Environment, 1 App |
+| [sandbox_groups](sandbox_groups/) | ⭐⭐⭐ Advanced | Stable/rich-preview Sandbox Group, delegated subnet, VNet connection, RBAC | RG, VNet, Subnet, Sandbox Group, VNet Connection, Role Assignment |
+| [sandbox_code_interpreter](sandbox_code_interpreter/) | ⭐⭐⭐ Advanced | Rich-preview group, ACR image, preserved Sandbox workload, MCP endpoint | RG, ACR, Sandbox Group, Role Assignments, data-plane Disk and Sandbox |
+| [sandbox_native_public](sandbox_native_public/) | ⭐⭐ Intermediate | Native provider, public Ubuntu image, lifecycle and egress policy | RG, Sandbox Group, Role Assignment, data-plane Sandbox |
+| [sandbox_native_private](sandbox_native_private/) | ⭐⭐⭐ Advanced | ACR import, scoped pull token, native disk image and Sandbox | RG, ACR, Scope Map, Token, Sandbox Group, Role Assignment, data-plane Disk and Sandbox |
 
 ## Module Architecture
 
@@ -117,9 +124,12 @@ terraform apply tfplan
 # 4. Verify
 terraform output app_urls
 
-# 5. Clean up
+# 5. Clean up standard examples
 terraform destroy
 ```
+
+The Sandbox workload example intentionally preserves data-plane resources when
+Terraform state is destroyed. Follow its README for explicit cleanup commands.
 
 ## Example READMEs
 
@@ -139,3 +149,8 @@ terraform destroy
 - [Java Spring](java_spring/) — Eureka + Config Server via AzAPI
 - [Init Containers](init_containers/) — Init containers with shared volumes
 - [Premium Ingress](premium_ingress/) — Dedicated ingress workload profile via AzAPI
+- [Express Mode](express_mode/) — Express environment and app through dedicated AzAPI resources
+- [Sandbox Groups](sandbox_groups/) — Stable/rich-preview ACA Sandbox Group control plane
+- [Sandbox Code Interpreter](sandbox_code_interpreter/) — Experimental preserved data-plane workload
+- [Native Public Sandbox](sandbox_native_public/) — First-class provider Sandbox from the public Ubuntu image
+- [Native Private Sandbox](sandbox_native_private/) — First-class provider private disk image and Sandbox backed by ACR

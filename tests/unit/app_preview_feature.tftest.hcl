@@ -3,6 +3,9 @@
 # ---------------------------------------------------------------------------
 # Validates that enabling a feature flag creates the AzAPI overlay resource.
 
+mock_provider "azurerm" {}
+mock_provider "azapi" {}
+
 variables {
   name                         = "test-app-preview"
   resource_group_name          = "rg-test"
@@ -29,8 +32,9 @@ variables {
 
   additional_port_mappings = [
     {
-      external   = false
-      targetPort = 8443
+      external     = false
+      target_port  = 8443
+      exposed_port = 8443
     }
   ]
 }
@@ -39,7 +43,7 @@ run "app_preview_feature_creates_overlay" {
   command = plan
 
   module {
-    source = "../../modules/container_app"
+    source = "./modules/container_app"
   }
 
   assert {
@@ -60,7 +64,7 @@ run "app_preview_feature_disabled_no_overlay" {
   }
 
   module {
-    source = "../../modules/container_app"
+    source = "./modules/container_app"
   }
 
   assert {

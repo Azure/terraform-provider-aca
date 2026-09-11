@@ -4,6 +4,9 @@
 # Validates that the container_app_environment module accepts valid input
 # and produces expected plan output.
 
+mock_provider "azurerm" {}
+mock_provider "azapi" {}
+
 variables {
   name                = "test-env"
   resource_group_name = "rg-test"
@@ -14,21 +17,21 @@ run "env_basic_validates" {
   command = plan
 
   module {
-    source = "../../modules/container_app_environment"
+    source = "./modules/container_app_environment"
   }
 
   assert {
-    condition     = azurerm_container_app_environment.this.name == "test-env"
+    condition     = azurerm_container_app_environment.this[0].name == "test-env"
     error_message = "Environment name should match input variable."
   }
 
   assert {
-    condition     = azurerm_container_app_environment.this.resource_group_name == "rg-test"
+    condition     = azurerm_container_app_environment.this[0].resource_group_name == "rg-test"
     error_message = "Resource group name should match input variable."
   }
 
   assert {
-    condition     = azurerm_container_app_environment.this.location == "eastus"
+    condition     = azurerm_container_app_environment.this[0].location == "eastus"
     error_message = "Location should match input variable."
   }
 }

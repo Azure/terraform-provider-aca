@@ -15,7 +15,7 @@ next_page:
 ---
 
 <p class="lead">
-The module tracks 19 ACA features and their provider coverage status. This page shows
+The module tracks ACA features and their provider coverage status. This page shows
 which features use AzureRM, which use AzAPI, and which are on the roadmap.
 </p>
 
@@ -23,9 +23,11 @@ which features use AzureRM, which use AzAPI, and which are on the roadmap.
 
 | | Version |
 |---|---|
-| **Latest GA** | `2025-07-01` |
-| **Latest Preview** | `2025-10-02-preview` |
-| **AzureRM Provider** | >= 4.0.0 |
+| **Latest published stable specification** | `2026-07-01` |
+| **Latest registered stable ARM contract** | `2026-01-01` |
+| **Express runtime default** | `2026-03-02-preview` |
+| **Sandbox runtime default/data plane** | `2026-02-01-preview` |
+| **AzureRM Provider** | >= 4.0.0, < 5.0.0 |
 | **AzAPI Provider** | >= 2.0.0 |
 
 ## Feature Coverage Matrix
@@ -50,6 +52,10 @@ which features use AzureRM, which use AzAPI, and which are on the roadmap.
 | Session Pools | ❌ | ✅ | `azapi` | [Sessions]({{ '/examples/sessions' | relative_url }}) |
 | Init Containers | ⚠️ | ✅ | `azapi` | [Init Containers]({{ '/examples/init-containers' | relative_url }}) |
 | Private Endpoints | ✅ | ✅ | `azurerm` | [Private Endpoint]({{ '/examples/private-endpoint' | relative_url }}) |
+| ACA Express | ❌ | ✅ | `azapi` | [Express]({{ '/examples/express-mode' | relative_url }}) |
+| Sandbox Groups (minimal profile) | ❌ | ✅ | `azapi` | [Sandbox Groups]({{ '/examples/sandbox-groups' | relative_url }}) |
+| Sandbox Groups (rich preview) | ❌ | ✅ | `azapi` | [Code Interpreter]({{ '/examples/sandbox-code-interpreter' | relative_url }}) |
+| Individual Sandbox workloads | ❌ | ⚠️ | `aca` CLI | [Code Interpreter]({{ '/examples/sandbox-code-interpreter' | relative_url }}) |
 | Resiliency Policies | ❌ | 🔜 | — | Planned |
 
 **Legend:** ✅ Supported · ⚠️ Partial · ❌ Not supported · 🔜 Planned
@@ -71,7 +77,10 @@ This ensures the module stays current with Azure's API releases without manual i
 
 | GA Version | Key Additions |
 |------------|---------------|
-| `2025-07-01` | Latest GA |
+| `2026-07-01` | Published specification for Express mode, Express app networking, Sandbox Groups, and VNet connections |
+| `2026-03-02-preview` | Currently registered Express environment and app contract |
+| `2026-02-01-preview` | Currently registered Sandbox Group, VNet connection, and data-plane contract |
+| `2025-07-01` | Premium ingress and private endpoint coverage |
 | `2025-01-01` | Java components, session pools, additional ports |
 | `2024-03-01` | Workload profiles improvements |
 | `2023-05-01` | Jobs, init containers |

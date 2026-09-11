@@ -146,6 +146,11 @@ resource "azurerm_container_app_job" "this" {
 
   lifecycle {
     precondition {
+      condition     = var.environment_mode != "Express"
+      error_message = "Container Apps jobs are not supported in Express environments."
+    }
+
+    precondition {
       condition     = length([for v in [var.schedule_trigger_config, var.event_trigger_config, var.manual_trigger_config] : v if v != null]) == 1
       error_message = "Exactly one of schedule_trigger_config, event_trigger_config, or manual_trigger_config must be provided."
     }

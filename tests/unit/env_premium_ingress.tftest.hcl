@@ -4,6 +4,9 @@
 # Validates that the container_app_environment module correctly merges the
 # dedicated ingress workload profile and plans the AzAPI overlay.
 
+mock_provider "azurerm" {}
+mock_provider "azapi" {}
+
 variables {
   name                = "test-env-premium-ingress"
   resource_group_name = "rg-test"
@@ -28,17 +31,17 @@ run "premium_ingress_validates" {
   command = plan
 
   module {
-    source = "../../modules/container_app_environment"
+    source = "./modules/container_app_environment"
   }
 
   assert {
-    condition     = azurerm_container_app_environment.this.name == "test-env-premium-ingress"
+    condition     = azurerm_container_app_environment.this[0].name == "test-env-premium-ingress"
     error_message = "Environment name should match input variable."
   }
 
   # The dedicated ingress workload profile should be merged into the list
   assert {
-    condition     = length(azurerm_container_app_environment.this.workload_profile) == 1
+    condition     = length(azurerm_container_app_environment.this[0].workload_profile) == 1
     error_message = "Should have exactly one workload profile (the ingress profile)."
   }
 
@@ -57,7 +60,7 @@ run "premium_ingress_with_user_profiles" {
   command = plan
 
   module {
-    source = "../../modules/container_app_environment"
+    source = "./modules/container_app_environment"
   }
 
   variables {
@@ -72,7 +75,7 @@ run "premium_ingress_with_user_profiles" {
   }
 
   assert {
-    condition     = length(azurerm_container_app_environment.this.workload_profile) == 2
+    condition     = length(azurerm_container_app_environment.this[0].workload_profile) == 2
     error_message = "Should have two workload profiles (user + ingress)."
   }
 }
@@ -85,7 +88,7 @@ run "premium_ingress_defaults" {
   command = plan
 
   module {
-    source = "../../modules/container_app_environment"
+    source = "./modules/container_app_environment"
   }
 
   variables {
@@ -93,7 +96,7 @@ run "premium_ingress_defaults" {
   }
 
   assert {
-    condition     = length(azurerm_container_app_environment.this.workload_profile) == 1
+    condition     = length(azurerm_container_app_environment.this[0].workload_profile) == 1
     error_message = "Should have exactly one workload profile (the default ingress profile)."
   }
 }

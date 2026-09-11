@@ -1,6 +1,6 @@
 ---
 title: Examples
-description: "15 deployment-tested examples covering beginner to advanced ACA patterns"
+description: "21 examples covering beginner to advanced ACA patterns"
 breadcrumbs:
   - title: Home
     url: /
@@ -12,7 +12,7 @@ prev_page:
 ---
 
 <p class="lead">
-All 16 examples have been deployed and validated on Azure. Each example is self-contained
+The repository contains 21 self-contained examples
 with its own <code>main.tf</code>, <code>variables.tf</code>, <code>outputs.tf</code>, and <code>README.md</code>.
 </p>
 
@@ -32,6 +32,11 @@ terraform apply tfplan
     <div class="example-name">Simple App</div>
     <div class="example-complexity">⭐ Beginner · 6 resources</div>
     <div class="example-desc">Minimal single container app with VNet, NSG, and external ingress. The "hello world" of ACA.</div>
+  </a>
+  <a href="{{ '/examples/express-mode' | relative_url }}" class="example-card">
+    <div class="example-name">ACA Express</div>
+    <div class="example-complexity">⭐ Beginner · Preview</div>
+    <div class="example-desc">Express environment and app with probes, scaling, CORS, IP restrictions, and ephemeral storage.</div>
   </a>
 </div>
 
@@ -112,5 +117,25 @@ terraform apply tfplan
     <div class="example-name">Java Spring</div>
     <div class="example-complexity">⭐⭐⭐ Advanced · 7 resources</div>
     <div class="example-desc">Spring Cloud Eureka + Config Server via AzAPI Java components with service bindings.</div>
+  </a>
+  <a href="{{ '/examples/sandbox-groups' | relative_url }}" class="example-card">
+    <div class="example-name">ACA Sandbox Groups</div>
+    <div class="example-complexity">⭐⭐⭐ Advanced · Preview</div>
+    <div class="example-desc">Stable/rich-preview Sandbox Group control plane with delegated VNet and RBAC.</div>
+  </a>
+  <a href="{{ '/examples/sandbox-code-interpreter' | relative_url }}" class="example-card">
+    <div class="example-name">Sandbox Code Interpreter</div>
+    <div class="example-complexity">⭐⭐⭐ Advanced · Experimental</div>
+    <div class="example-desc">Digest-pinned Python MCP workload created through the preserved ACA Sandbox data plane.</div>
+  </a>
+  <a href="{{ '/examples/sandbox-native-public' | relative_url }}" class="example-card">
+    <div class="example-name">Native Sandbox: Public Image</div>
+    <div class="example-complexity">⭐⭐ Intermediate · Preview</div>
+    <div class="example-desc">First-class Terraform Sandbox management using the public Ubuntu disk image.</div>
+  </a>
+  <a href="{{ '/examples/sandbox-native-private' | relative_url }}" class="example-card">
+    <div class="example-name">Native Sandbox: Private Image</div>
+    <div class="example-complexity">⭐⭐⭐ Advanced · Preview</div>
+    <div class="example-desc">ACR import, scoped registry token, private disk image, and Sandbox through the native provider.</div>
   </a>
 </div>

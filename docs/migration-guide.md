@@ -34,6 +34,44 @@ significantly — wait for stabilization.
 
 ## Migration Workflow
 
+### Express overlay to dedicated AzAPI resources
+
+Earlier revisions of the Express work created the environment and application
+with AzureRM and patched `environmentMode` through an AzAPI overlay. Express is
+now created directly with dedicated AzAPI resources. Terraform cannot safely
+move state between the AzureRM and AzAPI provider resource types automatically.
+
+Before applying an upgrade to an existing Express deployment:
+
+1. Back up the state and record the existing environment and application ARM
+   resource IDs.
+2. Update the module configuration, but do not run `terraform apply`.
+3. Remove the old AzureRM addresses from state. `terraform state rm` does not
+   delete the remote Azure resources.
+4. Import the same ARM IDs into the new AzAPI addresses.
+5. Run `terraform plan` and confirm it contains no deletes or replacements.
+
+For a root module named `aca` and application key `api`:
+
+```powershell
+terraform state pull | Set-Content -Encoding utf8 express-state-backup.json
+
+terraform state rm 'module.aca.module.container_app["api"].azurerm_container_app.this'
+terraform state rm 'module.aca.module.environment.azurerm_container_app_environment.this'
+
+terraform import 'module.aca.module.environment.azapi_resource.express[0]' '<environment-resource-id>'
+terraform import 'module.aca.module.container_app["api"].azapi_resource.express[0]' '<container-app-resource-id>'
+
+terraform plan
+```
+
+Repeat the application state removal and import for every Express application.
+Address prefixes differ when the environment or application modules are called
+directly. Do not run an intervening apply, and do not use `terraform state mv`
+across these provider resource types.
+
+---
+
 ### Step 1: Update the Capability Registry
 
 Edit `internal/capability_registry.yaml` and update the feature entry:

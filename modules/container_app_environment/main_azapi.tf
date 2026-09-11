@@ -4,12 +4,13 @@
 
 resource "azapi_update_resource" "peer_authentication" {
   count = (
+    !local.is_express &&
     var.feature_flags.peer_authentication &&
     lookup(var.provider_overrides, "peer_authentication", "azapi") == "azapi"
   ) ? 1 : 0
 
   type        = "Microsoft.App/managedEnvironments@2024-10-02-preview"
-  resource_id = azurerm_container_app_environment.this.id
+  resource_id = local.environment_id
 
   body = {
     properties = {
@@ -28,13 +29,14 @@ resource "azapi_update_resource" "peer_authentication" {
 
 resource "azapi_update_resource" "ingress_configuration" {
   count = (
+    !local.is_express &&
     var.feature_flags.premium_ingress &&
     var.ingress_configuration != null &&
     lookup(var.provider_overrides, "premium_ingress", "azapi") == "azapi"
   ) ? 1 : 0
 
   type        = "Microsoft.App/managedEnvironments@2025-07-01"
-  resource_id = azurerm_container_app_environment.this.id
+  resource_id = local.environment_id
 
   body = {
     properties = {
@@ -55,5 +57,8 @@ resource "azapi_update_resource" "ingress_configuration" {
     }
   }
 
-  depends_on = [azurerm_container_app_environment.this]
+  depends_on = [
+    azurerm_container_app_environment.this,
+    azapi_resource.express,
+  ]
 }

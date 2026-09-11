@@ -1,0 +1,6 @@
+bin/
+dist/
+.live-test/
+terraform.rc
+.terraformrc
+*.test

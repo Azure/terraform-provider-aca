@@ -3,6 +3,9 @@
 # ---------------------------------------------------------------------------
 # Validates that the container_app module correctly configures ingress.
 
+mock_provider "azurerm" {}
+mock_provider "azapi" {}
+
 variables {
   name                         = "test-app-ingress"
   resource_group_name          = "rg-test"
@@ -37,11 +40,11 @@ run "app_ingress_validates" {
   command = plan
 
   module {
-    source = "../../modules/container_app"
+    source = "./modules/container_app"
   }
 
   assert {
-    condition     = azurerm_container_app.this.name == "test-app-ingress"
+    condition     = azurerm_container_app.this[0].name == "test-app-ingress"
     error_message = "Container app name should match input variable."
   }
 }

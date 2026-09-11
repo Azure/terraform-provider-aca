@@ -1,4 +1,10 @@
+locals {
+  is_express = var.environment_mode == "Express"
+}
+
 resource "azurerm_container_app" "this" {
+  count = local.is_express ? 0 : 1
+
   name                         = var.name
   resource_group_name          = var.resource_group_name
   container_app_environment_id = var.container_app_environment_id
@@ -17,10 +23,13 @@ resource "azurerm_container_app" "this" {
     dynamic "container" {
       for_each = var.template.containers
       content {
-        name   = container.value.name
-        image  = container.value.image
-        cpu    = container.value.cpu
-        memory = container.value.memory
+        name              = container.value.name
+        image             = container.value.image
+        cpu               = container.value.cpu
+        memory            = container.value.memory
+        command           = try(container.value.command, null)
+        args              = try(container.value.args, null)
+        ephemeral_storage = try(container.value.ephemeral_storage, null)
 
         dynamic "env" {
           for_each = try(container.value.env, [])
@@ -49,6 +58,7 @@ resource "azurerm_container_app" "this" {
             interval_seconds        = try(liveness_probe.value.interval_seconds, null)
             timeout                 = try(liveness_probe.value.timeout, null)
             failure_count_threshold = try(liveness_probe.value.failure_count_threshold, null)
+            host                    = try(liveness_probe.value.host, null)
 
             dynamic "header" {
               for_each = try(liveness_probe.value.header, [])
@@ -70,6 +80,7 @@ resource "azurerm_container_app" "this" {
             timeout                 = try(readiness_probe.value.timeout, null)
             failure_count_threshold = try(readiness_probe.value.failure_count_threshold, null)
             success_count_threshold = try(readiness_probe.value.success_count_threshold, null)
+            host                    = try(readiness_probe.value.host, null)
 
             dynamic "header" {
               for_each = try(readiness_probe.value.header, [])
@@ -90,6 +101,7 @@ resource "azurerm_container_app" "this" {
             interval_seconds        = try(startup_probe.value.interval_seconds, null)
             timeout                 = try(startup_probe.value.timeout, null)
             failure_count_threshold = try(startup_probe.value.failure_count_threshold, null)
+            host                    = try(startup_probe.value.host, null)
 
             dynamic "header" {
               for_each = try(startup_probe.value.header, [])
@@ -138,6 +150,24 @@ resource "azurerm_container_app" "this" {
         storage_type = try(volume.value.storage_type, null)
       }
     }
+
+    dynamic "http_scale_rule" {
+      for_each = try(var.template.http_scale_rules, [])
+      content {
+        name                = http_scale_rule.value.name
+        concurrent_requests = http_scale_rule.value.concurrent_requests
+      }
+    }
+
+    dynamic "custom_scale_rule" {
+      for_each = try(var.template.custom_scale_rules, [])
+      content {
+        name             = custom_scale_rule.value.name
+        custom_rule_type = custom_scale_rule.value.custom_rule_type
+        metadata         = custom_scale_rule.value.metadata
+        identity_id      = try(custom_scale_rule.value.identity_id, null)
+      }
+    }
   }
 
   # ---------------------------------------------------------------------------
@@ -146,10 +176,33 @@ resource "azurerm_container_app" "this" {
   dynamic "ingress" {
     for_each = var.ingress != null ? [var.ingress] : []
     content {
-      target_port      = ingress.value.target_port
-      external_enabled = try(ingress.value.external_enabled, false)
-      transport        = try(ingress.value.transport, "auto")
-      exposed_port     = try(ingress.value.exposed_port, null)
+      target_port                = ingress.value.target_port
+      external_enabled           = try(ingress.value.external_enabled, false)
+      transport                  = try(ingress.value.transport, "auto")
+      exposed_port               = try(ingress.value.exposed_port, null)
+      allow_insecure_connections = try(ingress.value.allow_insecure_connections, false)
+
+      dynamic "cors" {
+        for_each = try(ingress.value.cors, null) != null ? [ingress.value.cors] : []
+        content {
+          allow_credentials_enabled = try(cors.value.allow_credentials_enabled, false)
+          allowed_headers           = try(cors.value.allowed_headers, null)
+          allowed_methods           = try(cors.value.allowed_methods, null)
+          allowed_origins           = cors.value.allowed_origins
+          exposed_headers           = try(cors.value.exposed_headers, null)
+          max_age_in_seconds        = try(cors.value.max_age_in_seconds, null)
+        }
+      }
+
+      dynamic "ip_security_restriction" {
+        for_each = try(ingress.value.ip_security_restrictions, [])
+        content {
+          action           = ip_security_restriction.value.action
+          description      = try(ip_security_restriction.value.description, null)
+          ip_address_range = ip_security_restriction.value.ip_address_range
+          name             = ip_security_restriction.value.name
+        }
+      }
 
       dynamic "traffic_weight" {
         for_each = length(try(ingress.value.traffic_weight, [])) > 0 ? ingress.value.traffic_weight : [{ percentage = 100, latest_revision = true }]

@@ -50,6 +50,11 @@ output "environment_static_ip_address" {
   value       = module.environment.static_ip_address
 }
 
+output "environment_mode" {
+  description = "Resolved Container App Environment mode."
+  value       = module.environment.environment_mode
+}
+
 # ---------------------------------------------------------------------------
 # Container Apps
 # ---------------------------------------------------------------------------
@@ -77,6 +82,31 @@ output "jobs" {
     for k, v in module.job : k => {
       id   = v.id
       name = v.name
+    }
+  }
+}
+
+# ---------------------------------------------------------------------------
+# Sandbox Groups
+# ---------------------------------------------------------------------------
+
+output "sandbox_groups" {
+  description = "Map of Sandbox Group outputs keyed by group identifier."
+  value = {
+    for k, v in module.sandbox_group : k => {
+      id                                      = v.id
+      name                                    = v.name
+      location                                = v.location
+      management_endpoint                     = v.management_endpoint
+      default_domain                          = v.default_domain
+      provisioning_state                      = v.provisioning_state
+      principal_id                            = v.principal_id
+      vnet_connection_ids                     = v.vnet_connection_ids
+      api_profile                             = v.api_profile
+      api_version                             = v.api_version
+      data_plane_operator_role_assignment_ids = v.data_plane_operator_role_assignment_ids
+      acr_pull_role_assignment_ids            = v.acr_pull_role_assignment_ids
+      management_lock_id                      = v.management_lock_id
     }
   }
 }

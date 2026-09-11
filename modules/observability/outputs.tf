@@ -3,6 +3,11 @@ output "log_analytics_workspace_id" {
   value       = local.log_analytics_workspace_id
 }
 
+output "log_analytics_workspace_customer_id" {
+  description = "Workspace customer ID used by Container Apps environment log configuration."
+  value       = var.create_log_analytics_workspace ? azurerm_log_analytics_workspace.this[0].workspace_id : null
+}
+
 output "log_analytics_workspace_primary_shared_key" {
   description = "Primary shared key of the Log Analytics workspace."
   value       = var.create_log_analytics_workspace ? azurerm_log_analytics_workspace.this[0].primary_shared_key : null

@@ -18,6 +18,12 @@ variable "container_app_environment_id" {
   type        = string
 }
 
+variable "environment_mode" {
+  description = "Mode of the target Container Apps environment."
+  type        = string
+  default     = "WorkloadProfiles"
+}
+
 variable "replica_timeout_in_seconds" {
   description = "Maximum number of seconds a replica is allowed to run."
   type        = number

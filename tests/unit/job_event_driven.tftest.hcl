@@ -3,6 +3,9 @@
 # ---------------------------------------------------------------------------
 # Validates that the jobs module accepts valid input for an event-driven job.
 
+mock_provider "azurerm" {}
+mock_provider "azapi" {}
+
 variables {
   name                         = "test-job-event"
   resource_group_name          = "rg-test"
@@ -61,7 +64,7 @@ run "job_event_driven_validates" {
   command = plan
 
   module {
-    source = "../../modules/jobs"
+    source = "./modules/jobs"
   }
 
   assert {

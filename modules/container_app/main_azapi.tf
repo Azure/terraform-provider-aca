@@ -4,10 +4,10 @@
 
 # --- advanced_ingress: additional port mappings (preview) ---
 resource "azapi_update_resource" "advanced_ingress" {
-  count = var.feature_flags.advanced_ingress && lookup(var.provider_overrides, "advanced_ingress", "azapi") == "azapi" ? 1 : 0
+  count = !local.is_express && var.feature_flags.advanced_ingress && lookup(var.provider_overrides, "advanced_ingress", "azapi") == "azapi" ? 1 : 0
 
   type        = "Microsoft.App/containerApps@2024-10-02-preview"
-  resource_id = azurerm_container_app.this.id
+  resource_id = local.app_id
 
   body = {
     properties = {
@@ -28,10 +28,10 @@ resource "azapi_update_resource" "advanced_ingress" {
 
 # --- kind_functionapp: set resource kind to "functionapp" ---
 resource "azapi_update_resource" "kind_functionapp" {
-  count = var.feature_flags.kind_functionapp && lookup(var.provider_overrides, "kind_functionapp", "azapi") == "azapi" ? 1 : 0
+  count = !local.is_express && var.feature_flags.kind_functionapp && lookup(var.provider_overrides, "kind_functionapp", "azapi") == "azapi" ? 1 : 0
 
   type        = "Microsoft.App/containerApps@2025-01-01"
-  resource_id = azurerm_container_app.this.id
+  resource_id = local.app_id
 
   body = {
     kind = "functionapp"
@@ -40,10 +40,10 @@ resource "azapi_update_resource" "kind_functionapp" {
 
 # --- dapr_app_health: Dapr application health checks (preview) ---
 resource "azapi_update_resource" "dapr_app_health" {
-  count = var.feature_flags.dapr_app_health && lookup(var.provider_overrides, "dapr_app_health", "azapi") == "azapi" ? 1 : 0
+  count = !local.is_express && var.feature_flags.dapr_app_health && lookup(var.provider_overrides, "dapr_app_health", "azapi") == "azapi" ? 1 : 0
 
   type        = "Microsoft.App/containerApps@2024-10-02-preview"
-  resource_id = azurerm_container_app.this.id
+  resource_id = local.app_id
 
   body = {
     properties = {
@@ -64,10 +64,10 @@ resource "azapi_update_resource" "dapr_app_health" {
 
 # --- sticky_sessions: session affinity (GA in API since 2023-05, not in azurerm) ---
 resource "azapi_update_resource" "sticky_sessions" {
-  count = var.feature_flags.sticky_sessions && lookup(var.provider_overrides, "sticky_sessions", "azapi") == "azapi" ? 1 : 0
+  count = !local.is_express && var.feature_flags.sticky_sessions && lookup(var.provider_overrides, "sticky_sessions", "azapi") == "azapi" ? 1 : 0
 
   type        = "Microsoft.App/containerApps@2025-01-01"
-  resource_id = azurerm_container_app.this.id
+  resource_id = local.app_id
 
   body = {
     properties = {
