@@ -1,6 +1,10 @@
 name: ACA Sandbox Provider Release
 
 on:
+  pull_request:
+    paths:
+      - '.github/workflows/provider-release.yml'
+      - 'provider/**'
   push:
     tags:
       - 'provider-v*'
@@ -23,10 +27,16 @@ jobs:
         id: version
         shell: bash
         run: |
-          version="${GITHUB_REF_NAME#provider-v}"
-          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
-            echo "::error::Tag must match provider-v<semver>; received $GITHUB_REF_NAME"
-            exit 1
+          if [[ "$GITHUB_REF" == refs/tags/provider-v* ]]; then
+            version="${GITHUB_REF_NAME#provider-v}"
+            if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+              echo "::error::Tag must match provider-v<semver>; received $GITHUB_REF_NAME"
+              exit 1
+            fi
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          else
+            version="0.0.0-dev"
+            echo "release=false" >> "$GITHUB_OUTPUT"
           fi
           echo "value=$version" >> "$GITHUB_OUTPUT"
 
@@ -87,6 +97,7 @@ jobs:
           )
 
       - name: Publish GitHub prerelease
+        if: steps.version.outputs.release == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.version.outputs.value }}
