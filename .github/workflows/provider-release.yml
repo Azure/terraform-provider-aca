@@ -1,0 +1,115 @@
+name: ACA Sandbox Provider Release
+
+on:
+  push:
+    tags:
+      - 'provider-v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: provider/go.mod
+          cache-dependency-path: provider/go.sum
+
+      - name: Resolve provider version
+        id: version
+        shell: bash
+        run: |
+          version="${GITHUB_REF_NAME#provider-v}"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::Tag must match provider-v<semver>; received $GITHUB_REF_NAME"
+            exit 1
+          fi
+          echo "value=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Test provider
+        working-directory: provider
+        run: |
+          go test ./...
+          go vet ./...
+
+      - name: Build release archives
+        env:
+          VERSION: ${{ steps.version.outputs.value }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+
+          targets=(
+            windows/amd64
+            windows/arm64
+            linux/amd64
+            linux/arm64
+            darwin/amd64
+            darwin/arm64
+          )
+
+          for target in "${targets[@]}"; do
+            goos="${target%/*}"
+            goarch="${target#*/}"
+            extension=""
+            if [[ "$goos" == "windows" ]]; then
+              extension=".exe"
+            fi
+
+            binary="terraform-provider-aca_v${VERSION}${extension}"
+            archive="terraform-provider-aca_${VERSION}_${goos}_${goarch}.zip"
+
+            (
+              cd provider
+              CGO_ENABLED=0 GOOS="$goos" GOARCH="$goarch" \
+                go build \
+                  -trimpath \
+                  -ldflags "-s -w -X main.version=${VERSION}" \
+                  -o "../dist/${binary}" \
+                  .
+            )
+
+            (
+              cd dist
+              zip -q "$archive" "$binary"
+              rm "$binary"
+            )
+          done
+
+          (
+            cd dist
+            sha256sum *.zip > "terraform-provider-aca_${VERSION}_SHA256SUMS"
+          )
+
+      - name: Publish GitHub prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.value }}
+        shell: bash
+        run: |
+          cat > "$RUNNER_TEMP/provider-release-notes.md" <<EOF
+          Preview build of the ACA Sandbox data-plane Terraform provider.
+
+          Provider source address: \`registry.terraform.io/Azure/aca\`
+          Provider version: \`${VERSION}\`
+          Source commit: \`${GITHUB_SHA}\`
+
+          This provider is not published to the Terraform Registry. Install the
+          archive for your platform through a Terraform filesystem mirror.
+          EOF
+
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" dist/* --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" \
+              dist/* \
+              --verify-tag \
+              --prerelease \
+              --title "ACA Sandbox Terraform Provider v${VERSION}" \
+              --notes-file "$RUNNER_TEMP/provider-release-notes.md"
+          fi
