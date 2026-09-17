@@ -4,7 +4,7 @@ terraform {
   required_providers {
     aca = {
       source  = "Azure/aca"
-      version = "0.1.0"
+      version = "= 0.5.0-pp"
     }
     azapi = {
       source  = "Azure/azapi"

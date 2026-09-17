@@ -36,7 +36,54 @@ The default data-plane contract is:
 - Token scope: `https://dynamicsessions.io/.default`
 - Endpoint: `https://management.{location}.azuredevcompute.io`
 
-## Build
+## Install a preview release
+
+Preview binaries are published as GitHub prereleases with tags in the form
+`provider-v<version>`. Each release contains Windows, Linux, and macOS archives
+for AMD64 and ARM64, plus a SHA-256 checksum manifest.
+
+The provider is not published to the Terraform Registry. Extract the archive
+for your platform into a Terraform filesystem mirror:
+
+```text
+provider-mirror/
+└── registry.terraform.io/
+    └── azure/
+        └── aca/
+            └── 0.5.0-pp/
+                └── windows_amd64/
+                    └── terraform-provider-aca_v0.5.0-pp.exe
+```
+
+Configure Terraform to use that mirror for this provider:
+
+```hcl
+provider_installation {
+  filesystem_mirror {
+    path    = "C:/path/to/provider-mirror"
+    include = ["registry.terraform.io/Azure/aca"]
+  }
+  direct {
+    exclude = ["registry.terraform.io/Azure/aca"]
+  }
+}
+```
+
+Set `TF_CLI_CONFIG_FILE` to the configuration file before running
+`terraform init`, and pin the matching provider version:
+
+```hcl
+terraform {
+  required_providers {
+    aca = {
+      source  = "Azure/aca"
+      version = "= 0.5.0-pp"
+    }
+  }
+}
+```
+
+## Build from source
 
 ```powershell
 Set-Location provider
@@ -52,7 +99,7 @@ go test ./...
 go build -o bin/terraform-provider-aca .
 ```
 
-During incubation, use a Terraform CLI `dev_overrides` entry for
+For provider development, use a Terraform CLI `dev_overrides` entry for
 `registry.terraform.io/Azure/aca`. Public Terraform Registry publication is a
 separate release decision because this repository also publishes Terraform
 modules.
