@@ -5,6 +5,8 @@ on:
     paths:
       - '.github/workflows/provider-release.yml'
       - 'provider/**'
+      - 'scripts/install-provider.sh'
+      - 'scripts/install-provider.ps1'
   push:
     tags:
       - 'provider-v*'
@@ -95,6 +97,42 @@ jobs:
             cd dist
             sha256sum *.zip > "terraform-provider-aca_${VERSION}_SHA256SUMS"
           )
+
+      - name: Test provider installers
+        env:
+          VERSION: ${{ steps.version.outputs.value }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python3 -m http.server 8765 --directory dist >"$RUNNER_TEMP/provider-http.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid"' EXIT
+
+          checksums="terraform-provider-aca_${VERSION}_SHA256SUMS"
+          for _ in {1..20}; do
+            if curl -fsS "http://127.0.0.1:8765/$checksums" >/dev/null; then
+              break
+            fi
+            sleep 0.5
+          done
+          curl -fsS "http://127.0.0.1:8765/$checksums" >/dev/null
+
+          export ACA_TF_PROVIDER_VERSION="$VERSION"
+          export ACA_TF_PLATFORM="linux_amd64"
+          export ACA_TF_PROVIDER_RELEASE_URL="http://127.0.0.1:8765"
+
+          ACA_TF_MIRROR_ROOT="$RUNNER_TEMP/bash-mirror" \
+            ACA_TF_CONFIG_PATH="$RUNNER_TEMP/bash.terraform.rc" \
+            bash scripts/install-provider.sh
+          test -x "$RUNNER_TEMP/bash-mirror/registry.terraform.io/azure/aca/$VERSION/linux_amd64/terraform-provider-aca_v$VERSION"
+          grep -F 'registry.terraform.io/azure/aca' "$RUNNER_TEMP/bash.terraform.rc"
+
+          ACA_TF_MIRROR_ROOT="$RUNNER_TEMP/pwsh-mirror" \
+            ACA_TF_CONFIG_PATH="$RUNNER_TEMP/pwsh.terraform.rc" \
+            pwsh -File scripts/install-provider.ps1
+          test -x "$RUNNER_TEMP/pwsh-mirror/registry.terraform.io/azure/aca/$VERSION/linux_amd64/terraform-provider-aca_v$VERSION"
+          grep -F 'registry.terraform.io/azure/aca' "$RUNNER_TEMP/pwsh.terraform.rc"
 
       - name: Publish GitHub prerelease
         if: steps.version.outputs.release == 'true'
