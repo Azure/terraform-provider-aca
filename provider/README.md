@@ -42,17 +42,32 @@ Preview binaries are published as GitHub prereleases with tags in the form
 `provider-v<version>`. Each release contains Windows, Linux, and macOS archives
 for AMD64 and ARM64, plus a SHA-256 checksum manifest.
 
-The provider is not published to the Terraform Registry. Extract the archive
-for your platform into a Terraform filesystem mirror:
+The provider is not published to the Terraform Registry. Run the installer for
+your shell from the directory containing your Terraform configuration:
+
+```bash
+curl -fsSLO https://raw.githubusercontent.com/Azure/terraform-provider-aca/main/scripts/install-provider.sh
+bash install-provider.sh
+export TF_CLI_CONFIG_FILE="$PWD/terraform.rc"
+```
+
+```powershell
+Invoke-WebRequest https://raw.githubusercontent.com/Azure/terraform-provider-aca/main/scripts/install-provider.ps1 -OutFile install-provider.ps1
+.\install-provider.ps1
+$env:TF_CLI_CONFIG_FILE = Join-Path $PWD 'terraform.rc'
+```
+
+The scripts download and checksum-verify the matching release archive, then
+create this Terraform filesystem mirror:
 
 ```text
 provider-mirror/
 └── registry.terraform.io/
     └── azure/
         └── aca/
-            └── 0.5.0-pp/
+            └── 0.5.0-preview/
                 └── windows_amd64/
-                    └── terraform-provider-aca_v0.5.0-pp.exe
+                    └── terraform-provider-aca_v0.5.0-preview.exe
 ```
 
 Configure Terraform to use that mirror for this provider:
@@ -61,10 +76,10 @@ Configure Terraform to use that mirror for this provider:
 provider_installation {
   filesystem_mirror {
     path    = "C:/path/to/provider-mirror"
-    include = ["registry.terraform.io/Azure/aca"]
+    include = ["registry.terraform.io/azure/aca"]
   }
   direct {
-    exclude = ["registry.terraform.io/Azure/aca"]
+    exclude = ["registry.terraform.io/azure/aca"]
   }
 }
 ```
@@ -77,7 +92,7 @@ terraform {
   required_providers {
     aca = {
       source  = "Azure/aca"
-      version = "= 0.5.0-pp"
+      version = "= 0.5.0-preview"
     }
   }
 }
